@@ -6,7 +6,6 @@
 |---|---|
 | Игра (лендинг) | https://migisweetlab.com/ |
 | Privacy Policy (en) | https://migisweetlab.com/sortit/privacy/ |
-| Политика конфиденциальности (ru) | https://migisweetlab.com/sortit/privacy/ru/ |
 | Support | https://migisweetlab.com/sortit/support/ |
 
 ## Как править

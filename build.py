@@ -65,7 +65,7 @@ def page(title, desc, body, path, lang="en"):
 {body}
 <footer>
   <span>© 2026 Migisweetlab</span>
-  <span><a href="{up}sortit/privacy/">Privacy Policy</a> · <a href="{up}sortit/privacy/ru/">Конфиденциальность</a> · <a href="mailto:{EMAIL}">{EMAIL}</a></span>
+  <span><a href="{up}sortit/privacy/">Privacy Policy</a> · <a href="mailto:{EMAIL}">{EMAIL}</a></span>
 </footer>
 </div>
 </body>
@@ -128,13 +128,13 @@ def landing():
 """)
 
 
-def policy(src, path, lang, other_href, other_label, title):
+def policy(src, path, lang, title):
     md = (ROOT / "src" / src).read_text(encoding="utf-8")
     html = markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"])
     # голые URL → ссылки
     html = re.sub(r'(?<![">])(https://[^\s<]+)', r'<a href="\1" rel="noopener">\1</a>', html)
     html = html.replace(EMAIL, f'<a href="mailto:{EMAIL}">{EMAIL}</a>')
-    body = f'<article class="doc"><a class="lang" href="{other_href}">{other_label}</a>{html}</article>'
+    body = f'<article class="doc">{html}</article>'
     desc = "SortIt privacy policy" if lang == "en" else "Политика конфиденциальности SortIt"
     write(path, page(title, desc, body, path, lang))
 
@@ -142,7 +142,6 @@ def policy(src, path, lang, other_href, other_label, title):
 def support():
     body = f"""
 <article class="doc">
-  <a class="lang" href="#ru">RU</a>
   <h1>Support</h1>
   <p>Questions, a bug, an idea for a level, or a level you can't beat? Write to us — we read every message.</p>
   <p style="font-size:20px;font-weight:900"><a href="mailto:{EMAIL}?subject=SortIt%20support">{EMAIL}</a></p>
@@ -151,10 +150,6 @@ def support():
   <p><b>Will I lose my progress if I change phones?</b><br>Progress is stored on your device. It moves to a new phone only through your phone's own backup (iCloud or Google backup).</p>
   <p><b>Does the game need the internet?</b><br>No, all levels are playable offline.</p>
   <p><b>How do I turn off analytics?</b><br>Settings → Analytics. See the <a href="../privacy/">Privacy Policy</a> for details.</p>
-  <hr id="ru" style="border:none;border-top:2px solid var(--line);margin:34px 0 10px">
-  <h1 style="font-size:28px">Поддержка</h1>
-  <p>Вопрос, ошибка, идея или уровень, который не получается пройти? Напишите нам: <a href="mailto:{EMAIL}?subject=SortIt">{EMAIL}</a>. Укажите, пожалуйста, модель телефона, версию системы, версию игры (внизу экрана «Настройки») и номер уровня.</p>
-  <p>Прогресс хранится на устройстве и переносится на новый телефон только через резервную копию (iCloud или Google). Аналитику можно выключить в «Настройки → Аналитика» — подробнее в <a href="../privacy/ru/">политике конфиденциальности</a>.</p>
 </article>
 """
     write("sortit/support/index.html", page("SortIt — Support", "Contact Migisweetlab about SortIt.", body, "sortit/support/index.html"))
@@ -171,7 +166,10 @@ def not_found():
 
 if __name__ == "__main__":
     landing()
-    policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "ru/", "RU", "SortIt — Privacy Policy")
-    policy("privacy-policy.ru.md", "sortit/privacy/ru/index.html", "ru", "../", "EN", "SortIt — Политика конфиденциальности")
+    policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "SortIt — Privacy Policy")
+    # Русская версия пока не публикуется: старый адрес ведёт на английскую
+    write("sortit/privacy/ru/index.html", f"""<!doctype html><meta charset="utf-8"><title>SortIt — Privacy Policy</title>
+<link rel="canonical" href="{SITE}/sortit/privacy/"><meta http-equiv="refresh" content="0; url=../"><a href="../">Privacy Policy</a>
+""")
     support()
     not_found()
