@@ -15,6 +15,9 @@ ROOT = Path(__file__).parent
 # Ссылки на сторы: пока пусто — кнопка показывается как «Скоро».
 APP_STORE_URL = ""   # например https://apps.apple.com/app/id0000000000
 GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=com.migisweetlab.sortit
+# Provider token из App Store Connect (Analytics → Campaigns). Если задан, к ссылке
+# в App Store добавляются pt/ct — установки видны по кампаниям (ct = ?src= из ссылки).
+APP_STORE_PT = ""
 EMAIL = "migisweetlab@gmail.com"
 SITE = "https://migisweetlab.com"
 
@@ -29,7 +32,7 @@ def store_btn(url, svg, small, big):
     return f'<span class="btn soon" title="Coming soon">{inner}</span>'
 
 
-def page(title, desc, body, path, lang="en"):
+def page(title, desc, body, path, lang="en", head=""):
     depth = path.count("/")
     up = "../" * depth
     canon = SITE + "/" + path.replace("index.html", "")
@@ -52,7 +55,7 @@ def page(title, desc, body, path, lang="en"):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{up}assets/style.css">
-</head>
+{head}</head>
 <body>
 <div class="wrap">
 <header class="top">
@@ -128,6 +131,55 @@ def landing():
 """)
 
 
+def get_page():
+    """/sortit/get/ — ссылка для шеринга из игры: отправляет в стор по ОС телефона.
+
+    GitHub Pages — статика, поэтому ОС определяется скриптом в браузере. Превью в
+    мессенджерах берётся из OG-тегов (боты скрипт не выполняют). Android → Google Play,
+    iPhone/iPad → App Store; если ссылки на стор ещё нет или это компьютер — остаёмся
+    на странице с кнопками. Параметр ?src=… (по умолчанию share) уходит в стор как
+    метка источника: utm_source в referrer Google Play и ct в App Store (если задан pt).
+    """
+    script = f"""<script>
+(function () {{
+  var APP_STORE = {APP_STORE_URL!r}, PLAY = {GOOGLE_PLAY_URL!r}, PT = {APP_STORE_PT!r};
+  var ua = navigator.userAgent || "";
+  // iPadOS 13+ представляется Маком: отличаем по сенсорному экрану
+  var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0);
+  var android = /Android/i.test(ua);
+  var src = "share";
+  try {{ src = (new URLSearchParams(location.search).get("src") || "share").replace(/[^\\w-]/g, "").slice(0, 40) || "share"; }} catch (e) {{}}
+  var url = "";
+  if (android && PLAY) {{
+    url = PLAY + (PLAY.indexOf("?") < 0 ? "?" : "&") + "referrer=" + encodeURIComponent("utm_source=" + src + "&utm_medium=link");
+  }} else if (ios && APP_STORE) {{
+    url = APP_STORE;
+    if (PT) url += (url.indexOf("?") < 0 ? "?" : "&") + "pt=" + PT + "&ct=" + src + "&mt=8";
+  }}
+  if (url) {{ document.documentElement.className += " redirecting"; location.replace(url); }}
+}})();
+</script>
+<style>.redirecting .get-hero {{ visibility: hidden; }}</style>
+"""
+    stores = (store_btn(APP_STORE_URL, APPLE_SVG, "Download on the", "App Store")
+              + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play"))
+    soon = "" if (APP_STORE_URL and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
+    body = f"""
+<section class="hero get-hero" style="text-align:center;display:block">
+  <img class="app-icon" style="margin-left:auto;margin-right:auto" src="../../assets/icon-512.png" alt="SortIt app icon" width="104" height="104">
+  <h1>Play SortIt</h1>
+  <p class="tag">Sort the shelves. Match three. Relax.</p>
+  <p>A cozy goods-sorting puzzle with a new Daily level every day. Free, no ads, plays offline.</p>
+  <div class="stores" style="justify-content:center">{stores}</div>
+  {soon}
+  <p style="margin-top:18px;font-size:14px"><a href="../../">More about the game</a></p>
+</section>
+"""
+    write("sortit/get/index.html", page("Play SortIt — cozy goods-sorting puzzle",
+                                        "Sort the shelves, match three and relax. Get SortIt for iPhone and Android.",
+                                        body, "sortit/get/index.html", head=script))
+
+
 def policy(src, path, lang, title):
     md = (ROOT / "src" / src).read_text(encoding="utf-8")
     html = markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"])
@@ -172,4 +224,5 @@ if __name__ == "__main__":
 <link rel="canonical" href="{SITE}/sortit/privacy/"><meta http-equiv="refresh" content="0; url=../"><a href="../">Privacy Policy</a>
 """)
     support()
+    get_page()
     not_found()
