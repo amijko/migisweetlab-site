@@ -17,7 +17,10 @@ import io
 import os
 import re
 import sys
-import markdown
+try:
+    import markdown  # если стоит — используем его
+except ImportError:  # системный python3 на Маке: пакета нет, хватает встроенного конвертера
+    markdown = None
 
 ROOT = Path(__file__).parent
 APP = Path(os.environ.get("SORTIT_REPO") or ROOT.parent / "SortIt").expanduser()
@@ -34,6 +37,50 @@ SHOTS = {
 SHOT_SIZE = (585, 1266)
 APP_LEVELS = "shared/src/commonMain/composeResources/files/levels"
 
+
+
+def _inline(text: str) -> str:
+    import html as _h
+    t = _h.escape(text, quote=False)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", t)
+    t = re.sub(r"`([^`]+)`", r"<code>\1</code>", t)
+    t = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", r'<a href="\2">\1</a>', t)
+    return t
+
+
+def md_to_html(md: str) -> str:
+    """Минимальный Markdown для политики: # заголовки, абзацы (перевод строки → <br />), списки «- », **жирный**, ссылки."""
+    out, para, items = [], [], []
+
+    def flush():
+        if para:
+            out.append("<p>" + "<br />\n".join(_inline(x) for x in para) + "</p>")
+            para.clear()
+        if items:
+            out.append("<ul>\n" + "\n".join(f"<li>{_inline(x)}</li>" for x in items) + "\n</ul>")
+            items.clear()
+
+    for line in md.splitlines():
+        s = line.rstrip()
+        h = re.match(r"^(#{1,6})\s+(.*)$", s)
+        li = re.match(r"^\s*[-*+]\s+(.*)$", s)
+        if not s.strip():
+            flush()
+        elif h:
+            flush()
+            n = len(h.group(1))
+            out.append(f"<h{n}>{_inline(h.group(2))}</h{n}>")
+        elif li:
+            if para:
+                flush()
+            items.append(li.group(1))
+        else:
+            if items:
+                flush()
+            para.append(s.strip())
+    flush()
+    return "\n".join(out)
 
 def level_counts():
     """Сколько уровней в игре — считаем файлы, а не пишем числа руками."""
@@ -269,7 +316,8 @@ def get_page():
 
 def policy(src, path, lang, title):
     md = (ROOT / "src" / src).read_text(encoding="utf-8")
-    html = markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"])
+    html = (markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"]) if markdown
+            else md_to_html(md))
     # голые URL → ссылки
     html = re.sub(r'(?<![">])(https://[^\s<]+)', r'<a href="\1" rel="noopener">\1</a>', html)
     html = html.replace(EMAIL, f'<a href="mailto:{EMAIL}">{EMAIL}</a>')
