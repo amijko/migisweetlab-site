@@ -322,21 +322,35 @@ def beta_page():
 
     APK тут намеренно нет: Google засчитывает тестера (12 человек × 14 дней), только если игра
     поставлена из Google Play под тем же аккаунтом, что нажал «Стать тестировщиком»."""
-    mail = f"mailto:{EMAIL}?subject=SortIt%20beta"
-    ios_en = (f'<p><a class="btn" href="{TESTFLIGHT_URL}" rel="noopener">{APPLE_SVG}<span><small>Join the beta on</small>TestFlight</span></a></p>'
-              if TESTFLIGHT_URL else "<p>iPhone beta via TestFlight is coming soon.</p>")
-    ios_ru = (f'<p><a class="btn" href="{TESTFLIGHT_URL}" rel="noopener">{APPLE_SVG}<span><small>Бета в</small>TestFlight</span></a></p>'
-              if TESTFLIGHT_URL else "<p>Бета для iPhone через TestFlight — скоро.</p>")
     btn_en = f'<a class="btn" href="{PLAY_TESTING_URL}" rel="noopener">{PLAY_SVG}<span><small>Step 1</small>Become a tester</span></a>'
     btn_ru = f'<a class="btn" href="{PLAY_TESTING_URL}" rel="noopener">{PLAY_SVG}<span><small>Шаг 1</small>Стать тестировщиком</span></a>'
     body = f"""
 <article class="doc">
-  <a class="lang" href="#ru">RU</a>
+  <a class="lang" href="#en">EN</a>
   <img class="app-icon" src="../../assets/icon-512.png" alt="SortIt app icon" width="88" height="88" style="width:88px;height:88px">
-  <h1>Help us test SortIt</h1>
+  <h1>Помогите протестировать SortIt</h1>
+  <p>SortIt — уютная головоломка-сортировка, которую мы готовим к выходу в Google Play. Перед публикацией Google требует
+  двухнедельный закрытый тест — и нам нужна ваша помощь. Это займёт минуту.</p>
+  <h2>Как присоединиться</h2>
+  <ol>
+    <li>Откройте эту страницу на своём Android-телефоне, где Google Play работает под вашим обычным Google-аккаунтом.</li>
+    <li>Нажмите <b>Стать тестировщиком</b> ниже, а потом ещё раз <b>Стать тестировщиком</b> на странице Google.</li>
+    <li>Там же нажмите <b>Скачать в Google Play</b> и установите игру. Ставьте именно из Google Play — только так Google
+    засчитает вас как тестировщика.</li>
+    <li>Заходите в игру иногда в течение 14 дней — пара уровней раз в несколько дней в самый раз. Пожалуйста, не выходите из теста раньше.</li>
+  </ol>
+  <p class="stores">{btn_ru}</p>
+  <div class="promo" hidden>
+    <p><b>Шаг 2 — получите игру бесплатно.</b> Ваш личный промокод: <code class="promo-code"></code>.
+    Нажмите кнопку и подтвердите в Google Play, потом установите игру (шаг 3 выше).</p>
+    <p class="stores"><a class="btn promo-link" href="#" rel="noopener">{PLAY_SVG}<span><small>Шаг 2</small>Активировать код</span></a></p>
+  </div>
+
+  <hr id="en" style="border:none;border-top:2px solid var(--line);margin:34px 0 10px">
+  <h1 style="font-size:30px">Help us test SortIt</h1>
   <p>SortIt is a cozy goods-sorting puzzle we're getting ready for Google Play. Before the public release Google asks
   for a two-week closed test — and we need your help. It takes one minute.</p>
-  <h2>Android</h2>
+  <h2>How to join</h2>
   <ol>
     <li>Open this page on your Android phone, signed in to Google Play with your usual Google account.</li>
     <li>Tap <b>Become a tester</b> below, then <b>Become a tester</b> again on the Google page.</li>
@@ -345,38 +359,33 @@ def beta_page():
     <li>Play now and then for the next 14 days — a couple of levels every few days is perfect. Please don't leave the test early.</li>
   </ol>
   <p class="stores">{btn_en}</p>
-  <p style="font-size:15px">Google says “not available” or “you're not a tester”? Send us the email of your Google account:
-  <a href="{mail}">{EMAIL}</a> — we'll add you and reply.</p>
-  <h2>iPhone</h2>
-  {ios_en}
-  <h2>Feedback</h2>
-  <p>Bugs, ideas, a level you can't beat — write to <a href="{mail}">{EMAIL}</a> or leave private feedback on the game's Google Play page. Thank you!</p>
-
-  <hr id="ru" style="border:none;border-top:2px solid var(--line);margin:34px 0 10px">
-  <h1 style="font-size:30px">Помогите протестировать SortIt</h1>
-  <p>SortIt — уютная головоломка-сортировка, которую мы готовим к выходу в Google Play. Перед публикацией Google требует
-  двухнедельный закрытый тест — и нам нужна ваша помощь. Это займёт минуту.</p>
-  <h2>Android</h2>
-  <ol>
-    <li>Откройте эту страницу на Android-телефоне, где Google Play работает под вашим обычным Google-аккаунтом.</li>
-    <li>Нажмите <b>Стать тестировщиком</b> ниже, а потом ещё раз <b>Стать тестировщиком</b> на странице Google.</li>
-    <li>Там же нажмите <b>Скачать в Google Play</b> и установите игру. Ставьте именно из Google Play — только так Google
-    засчитает вас как тестировщика.</li>
-    <li>Заходите в игру иногда в течение 14 дней — пара уровней раз в несколько дней в самый раз. Пожалуйста, не выходите из теста раньше.</li>
-  </ol>
-  <p class="stores">{btn_ru}</p>
-  <p style="font-size:15px">Google пишет «недоступно» или «вы не тестировщик»? Пришлите почту вашего Google-аккаунта на
-  <a href="{mail}">{EMAIL}</a> — добавим и ответим.</p>
-  <h2>iPhone</h2>
-  {ios_ru}
-  <h2>Отзывы</h2>
-  <p>Ошибки, идеи, уровень, который не получается пройти, — пишите на <a href="{mail}">{EMAIL}</a> или оставьте отзыв
-  для разработчика на странице игры в Google Play. Спасибо!</p>
+  <div class="promo" hidden>
+    <p><b>Step 2 — get the game for free.</b> Your personal promo code: <code class="promo-code"></code>.
+    Tap the button and confirm in Google Play, then install the game (step 3 above).</p>
+    <p class="stores"><a class="btn promo-link" href="#" rel="noopener">{PLAY_SVG}<span><small>Step 2</small>Redeem the code</span></a></p>
+  </div>
 </article>
 """
-    write("sortit/beta/index.html", page("SortIt — join the beta test",
-                                         "Help us test SortIt before release: become a tester on Google Play in one minute.",
-                                         body, "sortit/beta/index.html"))
+    # ?code=XXXX — личный промокод тестера: показываем шаг «активировать» со ссылкой
+    # play.google.com/redeem?code=… (Google Play откроет окно промокода с уже вписанным кодом).
+    script = """<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var code = "";
+  try { code = (new URLSearchParams(location.search).get("code") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40); } catch (e) {}
+  if (!code) return;
+  var url = "https://play.google.com/redeem?code=" + encodeURIComponent(code);
+  document.querySelectorAll(".promo").forEach(function (el) { el.hidden = false; });
+  document.querySelectorAll(".promo-code").forEach(function (el) { el.textContent = code; });
+  document.querySelectorAll(".promo-link").forEach(function (el) { el.href = url; });
+});
+</script>
+"""
+    html = page("SortIt — бета-тест",
+                "Помогите протестировать SortIt до выхода: станьте тестировщиком в Google Play за минуту.",
+                body, "sortit/beta/index.html", lang="ru", head=script)
+    # Страница для знакомых владельца: почту в подвале не показываем
+    html = html.replace(f' · <a href="mailto:{EMAIL}">{EMAIL}</a>', "")
+    write("sortit/beta/index.html", html)
 
 
 def policy(src, path, lang, title):
