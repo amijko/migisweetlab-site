@@ -32,6 +32,17 @@ SHOTS = {
     "shot-shelves.webp": "Game_scheme20_390x844.png",
 }
 SHOT_SIZE = (585, 1266)
+APP_LEVELS = "shared/src/commonMain/composeResources/files/levels"
+
+
+def level_counts():
+    """Сколько уровней в игре — считаем файлы, а не пишем числа руками."""
+    base = APP / APP_LEVELS
+    n = lambda pattern: sum(1 for p in base.glob(pattern) if p.name != "index.json")
+    packs = sorted(base.glob("pack_*"))
+    return {"line": n("pack_*/*.json"), "packs": len(packs),
+            "per_pack": n(f"{packs[0].name}/*.json") if packs else 0,
+            "zen": n("zen/*.json"), "challenge": n("challenge/*.json")}
 
 # Ссылки на сторы: пока пусто — кнопка показывается как «Скоро».
 APP_STORE_URL = ""   # например https://apps.apple.com/app/id0000000000
@@ -44,6 +55,9 @@ SITE = "https://migisweetlab.com"
 
 APPLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6zM14.2 5.6c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>'
 PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 2.6c-.3.3-.4.7-.4 1.2v16.4c0 .5.1.9.4 1.2l9.2-9.4L4 2.6zm10.4 8.2 2.7-2.7L6.3 2c-.4-.2-.8-.3-1.1-.2l9.2 9zm0 2.4-9.2 9c.3.1.7 0 1.1-.2l10.8-6.1-2.7-2.7zm3.9-4.4-3 3 3 3 3.3-1.9c.9-.5.9-1.8 0-2.3l-3.3-1.8z"/></svg>'
+
+
+SETS = {2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten"}
 
 
 def synced_files():
@@ -138,14 +152,23 @@ def page(title, desc, body, path, lang="en", head=""):
 """
 
 
+CHECK_ONLY = False
+STALE_PAGES = []
+
+
 def write(path, html):
     out = ROOT / path
+    if CHECK_ONLY:  # --check: страница отличается от того, что собралось бы сейчас
+        if not out.exists() or out.read_text(encoding="utf-8") != html:
+            STALE_PAGES.append(path)
+        return
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html, encoding="utf-8")
     print("wrote", path)
 
 
 def landing():
+    c = level_counts()
     stores = (store_btn(APP_STORE_URL, APPLE_SVG, "Download on the", "App Store")
               + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play"))
     soon = "" if (APP_STORE_URL and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
@@ -156,7 +179,8 @@ def landing():
     <h1>SortIt</h1>
     <p class="tag">Sort the shelves. Match three. Relax.</p>
     <p>A cozy goods-sorting puzzle: tap items on the shelves and put three of a kind together to clear them.
-    300 levels, a new Daily level every day and 50 spicy Challenge levels — all playable offline.</p>
+    {c["line"]} levels, {c["zen"]} relaxing Zen levels without a timer, a new Daily level every day
+    and {c["challenge"]} spicy Challenge levels — all playable offline.</p>
     <div class="stores">{stores}</div>
     {soon}
   </div>
@@ -167,12 +191,12 @@ def landing():
 </section>
 
 <section class="features">
-  <div class="feature"><div class="emo">🧺</div><h3>300 levels</h3><p>Six sets of 50 levels that grow from relaxing to tricky, with different shelf shapes along the way.</p></div>
+  <div class="feature"><div class="emo">🧺</div><h3>{c["line"]} levels</h3><p>{SETS.get(c["packs"], c["packs"])} sets of {c["per_pack"]} levels that grow from relaxing to tricky, with different shelf shapes along the way.</p></div>
   <div class="feature"><div class="emo">📅</div><h3>Daily level</h3><p>One fresh puzzle every day. Keep your streak going and collect rewards.</p></div>
-  <div class="feature"><div class="emo">🌶️</div><h3>Challenge</h3><p>50 spicy levels with traps and boss stages for players who want a real puzzle.</p></div>
+  <div class="feature"><div class="emo">🌶️</div><h3>Challenge</h3><p>{c["challenge"]} spicy levels with traps and boss stages for players who want a real puzzle.</p></div>
+  <div class="feature"><div class="emo">🍃</div><h3>Zen</h3><p>{c["zen"]} calm levels with no timer. Sort at your own pace and relax.</p></div>
   <div class="feature"><div class="emo">🧲</div><h3>Helpful boosters</h3><p>Magnet, Freeze, Shuffle, Hint and Undo — earned with in-game coins, never with real money.</p></div>
-  <div class="feature"><div class="emo">✈️</div><h3>Plays offline</h3><p>No account, no sign-in. Your progress stays on your phone.</p></div>
-  <div class="feature"><div class="emo">🚫</div><h3>No ads</h3><p>No ads and no real-money purchases — just the puzzle.</p></div>
+  <div class="feature"><div class="emo">✈️</div><h3>Offline, no ads</h3><p>No account, no ads, no real-money purchases. Your progress stays on your phone.</p></div>
 </section>
 
 <h2 class="section">Screenshots</h2>
@@ -185,7 +209,7 @@ def landing():
 <div style="height:32px"></div>
 """
     write("index.html", page("SortIt — cozy goods-sorting puzzle",
-                             "Sort the shelves, match three and relax. 300 levels, a Daily level and Challenge mode. By Migisweetlab.",
+                             f"Sort the shelves, match three and relax. {c['line']} levels, Zen, a Daily level and Challenge mode. By Migisweetlab.",
                              body, "index.html"))
     # /sortit/ ведёт на главную, чтобы ссылка migisweetlab.com/sortit тоже работала
     write("sortit/index.html", f"""<!doctype html><meta charset="utf-8"><title>SortIt</title>
@@ -278,16 +302,7 @@ def not_found():
     write("404.html", html)
 
 
-if __name__ == "__main__":
-    if "--check" in sys.argv:
-        stale = sync_from_app(check=True)
-        if stale:
-            print("Сайт отстаёт от игры: " + ", ".join(stale) + "\nОбновить: python3 build.py")
-            sys.exit(1)
-        print("Сайт совпадает с игрой.")
-        sys.exit(0)
-    updated = sync_from_app()
-    print("Из игры обновлено: " + (", ".join(updated) if updated else "ничего"))
+def build_pages():
     landing()
     policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "SortIt — Privacy Policy")
     # Русская версия пока не публикуется: старый адрес ведёт на английскую
@@ -297,3 +312,20 @@ if __name__ == "__main__":
     support()
     get_page()
     not_found()
+
+
+if __name__ == "__main__":
+    if "--check" in sys.argv:
+        stale = sync_from_app(check=True)
+        if not stale:  # страницы сравниваем, только когда исходники уже совпадают
+            CHECK_ONLY = True
+            build_pages()
+            stale = STALE_PAGES
+        if stale:
+            print("Сайт отстаёт от игры: " + ", ".join(stale) + "\nОбновить: python3 build.py")
+            sys.exit(1)
+        print("Сайт совпадает с игрой.")
+        sys.exit(0)
+    updated = sync_from_app()
+    print("Из игры обновлено: " + (", ".join(updated) if updated else "ничего"))
+    build_pages()
