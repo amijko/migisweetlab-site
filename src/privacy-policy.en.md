@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**SortIt** · Effective date: October 28, 2026
+**SortIt** · Effective date: October 29, 2026
 Developer: Migisweetlab · Contact: migisweetlab@gmail.com
 
 ## In short
@@ -31,6 +31,8 @@ The game uses two Google Firebase services.
 - a random app-instance identifier created on installation. It is not linked to your name, email or phone number and is reset if you reinstall the game.
 
 **Firebase Crashlytics** — crash reports: the state of the app at the moment of a crash (stack trace, device model, OS version, free memory and disk space, app version) and a random installation identifier.
+
+If you contact us via Feedback, a technical app log may be attached to your email: game events, device details (model, OS version, app version) and crash information. The log is stored only on your device, takes up no more than 512 KB, and is sent to us only with an email you send yourself. You choose whether to attach it before sending; the attachment is visible in the email and can be removed. The log contains no personal data.
 
 We do **not** collect the advertising identifier (IDFA / Google Advertising ID), contacts, photos, precise location, or anything you type. We do not combine this data with other sources and cannot identify you from it.
 

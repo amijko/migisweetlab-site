@@ -9,6 +9,8 @@
 | Support | https://migisweetlab.com/sortit/support/ |
 
 ## Как править
-- Тексты политики — `src/privacy-policy.en.md` и `src/privacy-policy.ru.md` (держать в синхроне с `SortIt/docs/legal/` и копией в игре).
+- Политика и скриншоты берутся из игры: `build.py` копирует `privacy_{en,ru}.md` из `SortIt/shared/.../files/legal/` в `src/` и делает `assets/shot-*.webp` из эталонов скриншот-тестов (таблица `SHOTS` в `build.py`). Руками их не править — править в игре.
+- Проверить, что сайт не отстал от игры: `python3 build.py --check` (код 1 — отстал). Путь к игре — `SORTIT_REPO`, по умолчанию `../SortIt`.
+- После merge тикета SortIt, который меняет политику, спрайты товаров или эти эталоны, раннер agent-team сам запускает `build.py`, коммитит и пушит сайт (`after_merge` в `projects/sortit/project.yaml`).
 - Ссылки на сторы — `APP_STORE_URL` / `GOOGLE_PLAY_URL` в начале `build.py`.
-- После правок: `pip install markdown && python3 build.py`, затем commit + push.
+- После правок: `pip install markdown pillow && python3 build.py`, затем commit + push.

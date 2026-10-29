@@ -1,16 +1,37 @@
 #!/usr/bin/env python3
 """Собирает статический сайт migisweetlab.com из шаблонов ниже и src/*.md.
 
-Запуск: python3 build.py   (нужен пакет markdown: pip install markdown)
+Запуск: python3 build.py   (нужны пакеты markdown и Pillow: pip install markdown pillow)
+        python3 build.py --check   — только проверить, что сайт совпадает с игрой (код выхода 1, если нет)
 Результат пишется прямо в корень репозитория (index.html, sortit/...), GitHub Pages
-отдаёт его как есть. Править тексты политики — только в src/privacy-policy.*.md
-(это те же файлы, что лежат в SortIt/docs/legal и в игре).
+отдаёт его как есть.
+
+Источник правды — репозиторий игры (SORTIT_REPO, по умолчанию ../SortIt):
+- политика конфиденциальности — копия той, что внутри игры
+  (shared/src/commonMain/composeResources/files/legal/privacy_{en,ru}.md) → src/privacy-policy.*.md;
+- скриншоты на лендинге — эталоны скриншот-тестов игры (SHOTS ниже) → assets/shot-*.webp.
+Руками src/privacy-policy.*.md и assets/shot-*.webp не править: build.py перезапишет их из игры.
 """
 from pathlib import Path
+import io
+import os
 import re
+import sys
 import markdown
 
 ROOT = Path(__file__).parent
+APP = Path(os.environ.get("SORTIT_REPO") or ROOT.parent / "SortIt").expanduser()
+APP_LEGAL = "shared/src/commonMain/composeResources/files/legal"
+APP_SNAPSHOTS = "shared/src/androidHostTest/snapshots"
+POLICIES = {"privacy-policy.en.md": "privacy_en.md", "privacy-policy.ru.md": "privacy_ru.md"}
+# Скриншот на сайте → эталон скриншот-теста игры (390×844 dp). Размер на сайте 585×1266.
+SHOTS = {
+    "shot-game.webp": "GameScreen_390x844.png",
+    "shot-home.webp": "Home_challenge_open_390x844.png",
+    "shot-sets.webp": "Packs_mid_390x844.png",
+    "shot-shelves.webp": "Game_scheme20_390x844.png",
+}
+SHOT_SIZE = (585, 1266)
 
 # Ссылки на сторы: пока пусто — кнопка показывается как «Скоро».
 APP_STORE_URL = ""   # например https://apps.apple.com/app/id0000000000
@@ -23,6 +44,47 @@ SITE = "https://migisweetlab.com"
 
 APPLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6zM14.2 5.6c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>'
 PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 2.6c-.3.3-.4.7-.4 1.2v16.4c0 .5.1.9.4 1.2l9.2-9.4L4 2.6zm10.4 8.2 2.7-2.7L6.3 2c-.4-.2-.8-.3-1.1-.2l9.2 9zm0 2.4-9.2 9c.3.1.7 0 1.1-.2l10.8-6.1-2.7-2.7zm3.9-4.4-3 3 3 3 3.3-1.9c.9-.5.9-1.8 0-2.3l-3.3-1.8z"/></svg>'
+
+
+def synced_files():
+    """Файлы сайта, которые берутся из игры: путь → байты."""
+    from PIL import Image
+    if not (APP / APP_LEGAL).is_dir():
+        sys.exit(f"Не нашёл репозиторий игры: {APP} (задай SORTIT_REPO)")
+    out = {}
+    for site_name, app_name in POLICIES.items():
+        out[f"src/{site_name}"] = (APP / APP_LEGAL / app_name).read_bytes()
+    for site_name, golden in SHOTS.items():
+        im = Image.open(APP / APP_SNAPSHOTS / golden).convert("RGB").resize(SHOT_SIZE, Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, "WEBP", quality=88, method=6)
+        out[f"assets/{site_name}"] = buf.getvalue()
+    return out
+
+
+def sync_from_app(check=False):
+    """Скопировать из игры политику и скриншоты. check=True — только сравнить. Возвращает список отличий."""
+    stale = []
+    for rel, data in synced_files().items():
+        path = ROOT / rel
+        if rel.endswith(".md"):
+            same = path.exists() and path.read_bytes() == data
+        else:  # картинка: сравниваем пиксели, а не байты кодека
+            same = path.exists() and _same_pixels(path, data)
+        if not same:
+            stale.append(rel)
+            if not check:
+                path.write_bytes(data)
+    return stale
+
+
+def _same_pixels(path, data, tol=2.0):
+    from PIL import Image, ImageChops, ImageStat
+    a = Image.open(path).convert("RGB")
+    b = Image.open(io.BytesIO(data)).convert("RGB")
+    if a.size != b.size:
+        return False
+    return max(ImageStat.Stat(ImageChops.difference(a, b)).mean) <= tol
 
 
 def store_btn(url, svg, small, big):
@@ -217,6 +279,15 @@ def not_found():
 
 
 if __name__ == "__main__":
+    if "--check" in sys.argv:
+        stale = sync_from_app(check=True)
+        if stale:
+            print("Сайт отстаёт от игры: " + ", ".join(stale) + "\nОбновить: python3 build.py")
+            sys.exit(1)
+        print("Сайт совпадает с игрой.")
+        sys.exit(0)
+    updated = sync_from_app()
+    print("Из игры обновлено: " + (", ".join(updated) if updated else "ничего"))
     landing()
     policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "SortIt — Privacy Policy")
     # Русская версия пока не публикуется: старый адрес ведёт на английскую
