@@ -98,6 +98,9 @@ GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.migisweetla
 # в App Store добавляются pt/ct — установки видны по кампаниям (ct = ?src= из ссылки).
 APP_STORE_PT = ""
 EMAIL = "migisweetlab@gmail.com"
+# Закрытое тестирование Google Play: по этой ссылке тестер нажимает «Стать тестировщиком».
+PLAY_TESTING_URL = "https://play.google.com/apps/testing/com.migisweetlab.sortit"
+TESTFLIGHT_URL = ""  # публичная ссылка TestFlight, когда появится iOS-бета
 SITE = "https://migisweetlab.com"
 
 APPLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6zM14.2 5.6c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>'
@@ -243,8 +246,8 @@ def landing():
   <div class="feature"><div class="emo">📅</div><h3>Daily level</h3><p>One fresh puzzle every day. Keep your streak going and collect rewards.</p></div>
   <div class="feature"><div class="emo">🌶️</div><h3>Challenge</h3><p>{c["challenge"]} spicy levels with traps and boss stages for players who want a real puzzle.</p></div>
   <div class="feature"><div class="emo">🍃</div><h3>Zen</h3><p>{c["zen"]} calm levels with no timer. Sort at your own pace and relax.</p></div>
-  <div class="feature"><div class="emo">🧲</div><h3>Helpful boosters</h3><p>Magnet, Freeze, Shuffle, Hint and Undo — earned with in-game coins, never with real money.</p></div>
-  <div class="feature"><div class="emo">✈️</div><h3>Offline, no ads</h3><p>No account, no ads, no real-money purchases. Your progress stays on your phone.</p></div>
+  <div class="feature"><div class="emo">🧲</div><h3>Helpful boosters</h3><p>Magnet, Freeze, Shuffle, Hint and Undo — earned with in-game coins — there are no in-app purchases.</p></div>
+  <div class="feature"><div class="emo">✈️</div><h3>Offline, no ads</h3><p>No account, no ads, no in-app purchases. Your progress stays on your phone.</p></div>
 </section>
 
 <h2 class="section">Screenshots</h2>
@@ -303,7 +306,7 @@ def get_page():
   <img class="app-icon" style="margin-left:auto;margin-right:auto" src="../../assets/icon-512.png" alt="SortIt app icon" width="104" height="104">
   <h1>Play SortIt</h1>
   <p class="tag">Sort the shelves. Match three. Relax.</p>
-  <p>A cozy goods-sorting puzzle with a new Daily level every day. Free, no ads, plays offline.</p>
+  <p>A cozy goods-sorting puzzle with a new Daily level every day. No ads, no in-app purchases, plays offline.</p>
   <div class="stores" style="justify-content:center">{stores}</div>
   {soon}
   <p style="margin-top:18px;font-size:14px"><a href="../../">More about the game</a></p>
@@ -312,6 +315,68 @@ def get_page():
     write("sortit/get/index.html", page("Play SortIt — cozy goods-sorting puzzle",
                                         "Sort the shelves, match three and relax. Get SortIt for iPhone and Android.",
                                         body, "sortit/get/index.html", head=script))
+
+
+def beta_page():
+    """/sortit/beta/ — приглашение в закрытый тест: шаги на en и ru, кнопка на opt-in Google Play.
+
+    APK тут намеренно нет: Google засчитывает тестера (12 человек × 14 дней), только если игра
+    поставлена из Google Play под тем же аккаунтом, что нажал «Стать тестировщиком»."""
+    mail = f"mailto:{EMAIL}?subject=SortIt%20beta"
+    ios_en = (f'<p><a class="btn" href="{TESTFLIGHT_URL}" rel="noopener">{APPLE_SVG}<span><small>Join the beta on</small>TestFlight</span></a></p>'
+              if TESTFLIGHT_URL else "<p>iPhone beta via TestFlight is coming soon.</p>")
+    ios_ru = (f'<p><a class="btn" href="{TESTFLIGHT_URL}" rel="noopener">{APPLE_SVG}<span><small>Бета в</small>TestFlight</span></a></p>'
+              if TESTFLIGHT_URL else "<p>Бета для iPhone через TestFlight — скоро.</p>")
+    btn_en = f'<a class="btn" href="{PLAY_TESTING_URL}" rel="noopener">{PLAY_SVG}<span><small>Step 1</small>Become a tester</span></a>'
+    btn_ru = f'<a class="btn" href="{PLAY_TESTING_URL}" rel="noopener">{PLAY_SVG}<span><small>Шаг 1</small>Стать тестировщиком</span></a>'
+    body = f"""
+<article class="doc">
+  <a class="lang" href="#ru">RU</a>
+  <img class="app-icon" src="../../assets/icon-512.png" alt="SortIt app icon" width="88" height="88" style="width:88px;height:88px">
+  <h1>Help us test SortIt</h1>
+  <p>SortIt is a cozy goods-sorting puzzle we're getting ready for Google Play. Before the public release Google asks
+  for a two-week closed test — and we need your help. It takes one minute.</p>
+  <h2>Android</h2>
+  <ol>
+    <li>Open this page on your Android phone, signed in to Google Play with your usual Google account.</li>
+    <li>Tap <b>Become a tester</b> below, then <b>Become a tester</b> again on the Google page.</li>
+    <li>On the same page tap <b>Download it on Google Play</b> and install the game. Please install it from Google Play —
+    only then Google counts you as a tester.</li>
+    <li>Play now and then for the next 14 days — a couple of levels every few days is perfect. Please don't leave the test early.</li>
+  </ol>
+  <p class="stores">{btn_en}</p>
+  <p style="font-size:15px">Google says “not available” or “you're not a tester”? Send us the email of your Google account:
+  <a href="{mail}">{EMAIL}</a> — we'll add you and reply.</p>
+  <h2>iPhone</h2>
+  {ios_en}
+  <h2>Feedback</h2>
+  <p>Bugs, ideas, a level you can't beat — write to <a href="{mail}">{EMAIL}</a> or leave private feedback on the game's Google Play page. Thank you!</p>
+
+  <hr id="ru" style="border:none;border-top:2px solid var(--line);margin:34px 0 10px">
+  <h1 style="font-size:30px">Помогите протестировать SortIt</h1>
+  <p>SortIt — уютная головоломка-сортировка, которую мы готовим к выходу в Google Play. Перед публикацией Google требует
+  двухнедельный закрытый тест — и нам нужна ваша помощь. Это займёт минуту.</p>
+  <h2>Android</h2>
+  <ol>
+    <li>Откройте эту страницу на Android-телефоне, где Google Play работает под вашим обычным Google-аккаунтом.</li>
+    <li>Нажмите <b>Стать тестировщиком</b> ниже, а потом ещё раз <b>Стать тестировщиком</b> на странице Google.</li>
+    <li>Там же нажмите <b>Скачать в Google Play</b> и установите игру. Ставьте именно из Google Play — только так Google
+    засчитает вас как тестировщика.</li>
+    <li>Заходите в игру иногда в течение 14 дней — пара уровней раз в несколько дней в самый раз. Пожалуйста, не выходите из теста раньше.</li>
+  </ol>
+  <p class="stores">{btn_ru}</p>
+  <p style="font-size:15px">Google пишет «недоступно» или «вы не тестировщик»? Пришлите почту вашего Google-аккаунта на
+  <a href="{mail}">{EMAIL}</a> — добавим и ответим.</p>
+  <h2>iPhone</h2>
+  {ios_ru}
+  <h2>Отзывы</h2>
+  <p>Ошибки, идеи, уровень, который не получается пройти, — пишите на <a href="{mail}">{EMAIL}</a> или оставьте отзыв
+  для разработчика на странице игры в Google Play. Спасибо!</p>
+</article>
+"""
+    write("sortit/beta/index.html", page("SortIt — join the beta test",
+                                         "Help us test SortIt before release: become a tester on Google Play in one minute.",
+                                         body, "sortit/beta/index.html"))
 
 
 def policy(src, path, lang, title):
@@ -360,6 +425,7 @@ def build_pages():
 """)
     support()
     get_page()
+    beta_page()
     not_found()
 
 

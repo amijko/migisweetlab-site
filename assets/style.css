@@ -98,7 +98,12 @@ h2.section { font-size: 30px; font-weight: 900; margin: 0 0 18px; }
 .doc h1 { font-size: 36px; font-weight: 900; margin: 0 0 8px; line-height: 1.15; }
 .doc h2 { font-size: 22px; font-weight: 900; margin: 30px 0 8px; }
 .doc p, .doc li { color: var(--ink); }
-.doc ul { padding-left: 22px; }
+.doc ul, .doc ol { padding-left: 22px; }
+.doc ol li { margin: 8px 0; }
+.doc .stores { margin: 18px 0; }
+.doc .app-icon { margin-bottom: 14px; }
+/* кнопки-ссылки белые и в тёмной теме (правило для a там сильнее .btn) */
+a.btn, a.btn:visited { color: #fff !important; text-decoration: none; }
 .doc li { margin: 4px 0; }
 .doc a { word-break: break-word; }
 .lang { float: right; font-weight: 800; font-size: 14px; background: var(--bg); border: 2px solid var(--line); border-radius: 999px; padding: 4px 12px; text-decoration: none; color: var(--ink); }
