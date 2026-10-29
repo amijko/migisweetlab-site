@@ -14,7 +14,7 @@ ROOT = Path(__file__).parent
 
 # Ссылки на сторы: пока пусто — кнопка показывается как «Скоро».
 APP_STORE_URL = ""   # например https://apps.apple.com/app/id0000000000
-GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=com.migisweetlab.sortit
+GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.migisweetlab.sortit"
 # Provider token из App Store Connect (Analytics → Campaigns). Если задан, к ссылке
 # в App Store добавляются pt/ct — установки видны по кампаниям (ct = ?src= из ссылки).
 APP_STORE_PT = ""
