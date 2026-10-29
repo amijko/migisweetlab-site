@@ -26,7 +26,7 @@ APP_SNAPSHOTS = "shared/src/androidHostTest/snapshots"
 POLICIES = {"privacy-policy.en.md": "privacy_en.md", "privacy-policy.ru.md": "privacy_ru.md"}
 # Скриншот на сайте → эталон скриншот-теста игры (390×844 dp). Размер на сайте 585×1266.
 SHOTS = {
-    "shot-game.webp": "GameScreen_390x844.png",
+    "shot-game.webp": "site:shots-src/game-level21.png",  # снят с телефона: у golden-а уровня 21 старая раскладка
     "shot-home.webp": "Home_challenge_open_390x844.png",
     "shot-sets.webp": "Packs_mid_390x844.png",
     "shot-shelves.webp": "Game_scheme20_390x844.png",
@@ -69,7 +69,8 @@ def synced_files():
     for site_name, app_name in POLICIES.items():
         out[f"src/{site_name}"] = (APP / APP_LEGAL / app_name).read_bytes()
     for site_name, golden in SHOTS.items():
-        im = Image.open(APP / APP_SNAPSHOTS / golden).convert("RGB").resize(SHOT_SIZE, Image.LANCZOS)
+        src = ROOT / golden[5:] if golden.startswith("site:") else APP / APP_SNAPSHOTS / golden
+        im = Image.open(src).convert("RGB").resize(SHOT_SIZE, Image.LANCZOS)
         buf = io.BytesIO()
         im.save(buf, "WEBP", quality=88, method=6)
         out[f"assets/{site_name}"] = buf.getvalue()
@@ -201,7 +202,7 @@ def landing():
 
 <h2 class="section">Screenshots</h2>
 <div class="shots">
-  <img src="assets/shot-game.webp" alt="Game screen with a shelf of items" width="585" height="1266" loading="lazy">
+  <img src="assets/shot-game.webp" alt="Level 21: shelves full of snacks and drinks" width="585" height="1266" loading="lazy">
   <img src="assets/shot-shelves.webp" alt="Wall shelves level" width="585" height="1266" loading="lazy">
   <img src="assets/shot-home.webp" alt="Home screen with Daily level and Challenge" width="585" height="1266" loading="lazy">
   <img src="assets/shot-sets.webp" alt="Level sets" width="585" height="1266" loading="lazy">
