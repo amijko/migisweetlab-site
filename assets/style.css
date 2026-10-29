@@ -125,3 +125,7 @@ footer a { color: var(--ink-soft); }
   .phone { width: 160px; }
   .phone-pair { height: 380px; }
 }
+
+/* страница беты: крупные кнопки шагов на всю ширину */
+.beta .stores { margin: 12px 0; }
+.beta .btn { width: 100%; justify-content: flex-start; padding: 16px 20px; font-size: 18px; }
