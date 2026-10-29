@@ -8,6 +8,9 @@
   --brand-dark: #c94f17;
   --green: #2dbe8c;
   --green-dark: #1f9a70;
+  /* кнопки сторов: белый текст на зелёном, контраст 4.9:1 */
+  --btn-green: #17805c;
+  --btn-green-dark: #0f5c41;
   --wood: #6b4226;
   --line: #f0d9bb;
   --shadow: 0 6px 0 rgba(107, 66, 38, .18), 0 14px 30px rgba(107, 66, 38, .12);
@@ -59,12 +62,15 @@ a { color: var(--brand-dark); }
 .stores { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .btn {
   display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 16px;
-  font-weight: 900; font-size: 16px; text-decoration: none; color: #fff; background: var(--green);
-  box-shadow: 0 5px 0 var(--green-dark); transition: transform .08s;
+  font-weight: 900; font-size: 16px; text-decoration: none; color: #fff; background: var(--btn-green);
+  box-shadow: 0 5px 0 var(--btn-green-dark); transition: transform .08s;
 }
-.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--green-dark); }
+.btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--btn-green-dark); }
+/* .btn — это ссылка: цвет ссылок (в тёмной теме оранжевый) на кнопку не переносим */
+a.btn, a.btn:hover, a.btn:visited { color: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) a.btn { color: #fff; } }
 .btn.soon { background: var(--wood); box-shadow: 0 5px 0 #4a2c17; cursor: default; opacity: .85; }
-.btn small { font-weight: 700; opacity: .8; font-size: 12px; display: block; line-height: 1; }
+.btn small { font-weight: 700; opacity: .92; font-size: 12px; display: block; line-height: 1; }
 .btn span { line-height: 1.1; text-align: left; }
 .btn svg { width: 22px; height: 22px; flex: none; }
 .phone-pair { position: relative; height: 560px; }
