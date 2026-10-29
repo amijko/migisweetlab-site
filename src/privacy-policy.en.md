@@ -64,9 +64,9 @@ Analytics data is kept for up to 14 months and then deleted automatically. Crash
 
 We process this data based on our legitimate interest in keeping the game stable and improving it. You can object at any time by switching off Analytics in Settings.
 
-## No purchases, ads or tracking
+## No in-app purchases, ads or tracking
 
-- No purchases for real money. Coins and boosters are virtual and earned only by playing.
+- No in-app purchases. Coins and boosters are virtual and earned only by playing; they can't be bought.
 - No advertising.
 - No tracking across other companies' apps or websites.
 
