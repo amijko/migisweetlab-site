@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**SortIt** · Effective date: October 29, 2026
+**SortIt** · Effective date: November 2, 2026
 Developer: Migisweetlab · Contact: migisweetlab@gmail.com
 
 ## In short
 
-SortIt has no accounts and never asks for your name, email or other contact details. Your game progress is stored on your device. To understand how the game is played and to fix crashes, the game sends anonymous usage statistics and crash reports to Google Firebase. You can turn this off at any time in **Settings → Analytics**.
+SortIt has no accounts and never asks for your name, email or other contact details. Your game progress is stored on your device. To understand how the game is played and to fix crashes, the game sends anonymous usage statistics and crash reports to Google Firebase. You can turn this off at any time in **Settings → Analytics**. Some content can be unlocked with optional in-app purchases made through Google Play or the App Store; we never see your payment details.
 
 ## Data stored on your device
 
@@ -14,6 +14,7 @@ To let you continue playing, the game saves on your device:
 - level progress, stars and records;
 - coins, boosters and streak shields (virtual items earned in the game);
 - daily level history and streak;
+- which in-app purchases you own (for example, unlocked level packs), so the game works offline;
 - settings (sound, music, vibration, analytics).
 
 This data stays on your device. It is removed when you delete the game or clear its data. Your phone's own backup (iCloud or Google backup) may include it, depending on your device settings; such backups are handled by Apple or Google under their privacy policies.
@@ -25,6 +26,7 @@ The game uses two Google Firebase services.
 **Firebase Analytics** — usage statistics:
 
 - in-game events: levels started, completed or failed, time spent on a level, stars, boosters used or bought, daily level and Challenge progress, set unlocks;
+- in-app purchases: which product was bought, its price and currency, and the store's transaction ID. Firebase receives this from Google Play or the App Store; it contains no name, email or payment details;
 - app sessions, first launch and app version;
 - device information: device model, operating system and version, screen size, language;
 - approximate location (country and region), derived by Google from your IP address; we do not receive your IP address;
@@ -40,13 +42,14 @@ We do **not** collect the advertising identifier (IDFA / Google Advertising ID),
 
 - to see which levels are too hard or too easy and improve difficulty;
 - to understand which features are used and how many players come back;
+- to understand which level packs players buy;
 - to find and fix crashes and bugs.
 
 We do not use this data for advertising, do not sell it and do not share it with anyone except Google, which processes it for us as a service provider.
 
 ## Turning it off
 
-Open **Settings** in the game and switch off **Analytics**. After that the game stops sending usage statistics and crash reports from your device. Uninstalling the game also stops all collection.
+Open **Settings** in the game and switch off **Analytics**. After that the game stops sending usage statistics and crash reports from your device. Purchases keep working: the game still checks them with Google Play or the App Store. Uninstalling the game also stops all collection.
 
 ## Google Firebase
 
@@ -62,11 +65,19 @@ Analytics data is kept for up to 14 months and then deleted automatically. Crash
 
 ## Legal basis (EEA and UK)
 
-We process this data based on our legitimate interest in keeping the game stable and improving it. You can object at any time by switching off Analytics in Settings.
+We process this data based on our legitimate interest in keeping the game stable and improving it. You can object at any time by switching off Analytics in Settings. Checking your purchases with the store is necessary to give you what you bought (performance of a contract).
 
-## No in-app purchases, ads or tracking
+## In-app purchases
 
-- No in-app purchases. Coins and boosters are virtual and earned only by playing; they can't be bought.
+Purchases are processed by Google Play or the Apple App Store under their own terms and privacy policies. We never receive your name, email, card number or other payment details.
+
+The store tells the game which items you own. The game keeps this on your device and checks it with the store, so purchases are linked to your Google or Apple account and come back if you reinstall the game. Refunds are handled by the store.
+
+Purchase events are also recorded in Firebase Analytics, as described above.
+
+## No ads or tracking
+
+- Coins and boosters are virtual and earned only by playing; they can't be bought with real money.
 - No advertising.
 - No tracking across other companies' apps or websites.
 
