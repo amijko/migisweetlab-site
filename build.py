@@ -320,7 +320,8 @@ def get_page():
 def beta_page():
     """/sortit/beta/ — приглашение знакомых в закрытый тест: три кнопки по порядку, минимум текста.
 
-    ?code=XXXX — личный промокод: появляется шаг «Активировать код» (play.google.com/redeem?code=…).
+    Промокоды больше не нужны (03.11.2026): два шага — стать тестировщиком и установить. Старые ссылки
+    с ?code=… просто открывают эту же страницу. Gmail тестировщика владелец заранее добавляет в список в Play Console.
     APK тут намеренно нет: Google засчитывает тестера (12 человек × 14 дней), только если игра
     поставлена из Google Play под тем же аккаунтом, что нажал «Стать тестировщиком»."""
     def step(n_cls, small, big, href, extra=""):
@@ -334,10 +335,10 @@ def beta_page():
             "  <p>" + ("Пара нажатий — и иногда заходи поиграть в течение 14 дней. Не удаляй игру, пожалуйста: так Google разрешит её выпустить. Спасибо!" if ru
                       else "A couple of taps — then play now and then for 14 days. Please don't uninstall it: that's how Google lets the game go live. Thank you!") + "</p>",
             "  " + step("n1", "Шаг 1" if ru else "Step 1", "Стать тестировщиком" if ru else "Become a tester", PLAY_TESTING_URL),
-            '  <div class="promo" hidden>' + step("n2", "Шаг 2" if ru else "Step 2",
-                                                  "Получить игру бесплатно" if ru else "Get the game free", "#", " promo-link") + "</div>",
             "  " + step("n-install", "Шаг 2" if ru else "Step 2", "Установить из Google Play" if ru else "Install from Google Play",
                         GOOGLE_PLAY_URL),
+            '  <p style="font-size:14px;opacity:.75">' + ("Если Google Play пишет, что приложение недоступно, — напиши мне, я добавлю твою почту Gmail в список тестировщиков." if ru
+                      else "If Google Play says the app isn't available, message me and I'll add your Gmail to the tester list.") + "</p>",
         ])
 
     body = f"""
@@ -349,19 +350,7 @@ def beta_page():
 {block("en")}
 </article>
 """
-    script = """<script>
-document.addEventListener("DOMContentLoaded", function () {
-  var code = "";
-  try { code = (new URLSearchParams(location.search).get("code") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40); } catch (e) {}
-  if (!code) return;
-  var url = "https://play.google.com/redeem?code=" + encodeURIComponent(code);
-  document.querySelectorAll(".promo").forEach(function (el) { el.hidden = false; });
-  document.querySelectorAll(".promo-link").forEach(function (el) { el.href = url; });
-  // с кодом установка — третий шаг
-  document.querySelectorAll(".n-install").forEach(function (el) { el.textContent = el.textContent.replace("2", "3"); });
-});
-</script>
-"""
+    script = ""
     html = page("SortIt — бета-тест",
                 "Помоги протестировать SortIt: пара нажатий в Google Play.",
                 body, "sortit/beta/index.html", lang="ru", head=script)
