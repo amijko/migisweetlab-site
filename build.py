@@ -100,7 +100,7 @@ APP_STORE_PT = ""
 EMAIL = "migisweetlab@gmail.com"
 # Закрытое тестирование Google Play: по этой ссылке тестер нажимает «Стать тестировщиком».
 PLAY_TESTING_URL = "https://play.google.com/apps/testing/com.migisweetlab.sortit"
-TESTFLIGHT_URL = ""  # публичная ссылка TestFlight, когда появится iOS-бета
+TESTFLIGHT_URL = "https://testflight.apple.com/join/M5Xz6TdV"  # публичная ссылка TestFlight (iOS-бета), пока нет APP_STORE_URL
 SITE = "https://migisweetlab.com"
 
 APPLE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.4 2-3.5 2-3.6-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.8-3.5.8-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.6zM14.2 5.6c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></svg>'
@@ -157,6 +157,16 @@ def store_btn(url, svg, small, big):
     if url:
         return f'<a class="btn" href="{url}" rel="noopener">{inner}</a>'
     return f'<span class="btn soon" title="Coming soon">{inner}</span>'
+
+
+def ios_btn():
+    """App Store, если игра уже там; до этого — бета в TestFlight (значок «Download on the App Store»
+    Apple разрешает только для опубликованных приложений); иначе «Скоро»."""
+    if APP_STORE_URL:
+        return store_btn(APP_STORE_URL, APPLE_SVG, "Download on the", "App Store")
+    if TESTFLIGHT_URL:
+        return store_btn(TESTFLIGHT_URL, APPLE_SVG, "iPhone beta on", "TestFlight")
+    return store_btn("", APPLE_SVG, "Download on the", "App Store")
 
 
 def page(title, desc, body, path, lang="en", head=""):
@@ -220,9 +230,8 @@ def write(path, html):
 
 def landing():
     c = level_counts()
-    stores = (store_btn(APP_STORE_URL, APPLE_SVG, "Download on the", "App Store")
-              + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play"))
-    soon = "" if (APP_STORE_URL and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
+    stores = ios_btn() + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play")
+    soon = "" if ((APP_STORE_URL or TESTFLIGHT_URL) and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
     body = f"""
 <section class="hero">
   <div>
@@ -279,7 +288,7 @@ def get_page():
     """
     script = f"""<script>
 (function () {{
-  var APP_STORE = {APP_STORE_URL!r}, PLAY = {GOOGLE_PLAY_URL!r}, PT = {APP_STORE_PT!r};
+  var APP_STORE = {APP_STORE_URL!r}, PLAY = {GOOGLE_PLAY_URL!r}, PT = {APP_STORE_PT!r}, TF = {TESTFLIGHT_URL!r};
   var ua = navigator.userAgent || "";
   // iPadOS 13+ представляется Маком: отличаем по сенсорному экрану
   var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0);
@@ -292,15 +301,16 @@ def get_page():
   }} else if (ios && APP_STORE) {{
     url = APP_STORE;
     if (PT) url += (url.indexOf("?") < 0 ? "?" : "&") + "pt=" + PT + "&ct=" + src + "&mt=8";
+  }} else if (ios && TF) {{
+    url = TF;
   }}
   if (url) {{ document.documentElement.className += " redirecting"; location.replace(url); }}
 }})();
 </script>
 <style>.redirecting .get-hero {{ visibility: hidden; }}</style>
 """
-    stores = (store_btn(APP_STORE_URL, APPLE_SVG, "Download on the", "App Store")
-              + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play"))
-    soon = "" if (APP_STORE_URL and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
+    stores = ios_btn() + store_btn(GOOGLE_PLAY_URL, PLAY_SVG, "Get it on", "Google Play")
+    soon = "" if ((APP_STORE_URL or TESTFLIGHT_URL) and GOOGLE_PLAY_URL) else '<p style="margin-top:14px;font-size:14px">Coming soon to iPhone and Android.</p>'
     body = f"""
 <section class="hero get-hero" style="text-align:center;display:block">
   <img class="app-icon" style="margin-left:auto;margin-right:auto" src="../../assets/icon-512.png" alt="SortIt app icon" width="104" height="104">
@@ -337,6 +347,12 @@ def beta_page():
             "  " + step("n1", "Шаг 1" if ru else "Step 1", "Стать тестировщиком" if ru else "Become a tester", PLAY_TESTING_URL),
             "  " + step("n-install", "Шаг 2" if ru else "Step 2", "Установить из Google Play" if ru else "Install from Google Play",
                         GOOGLE_PLAY_URL),
+            ('  <h2 style="margin-top:28px">' + ("На iPhone" if ru else "On iPhone") + "</h2>\n"
+             + "  <p>" + ("Открой ссылку на iPhone, поставь TestFlight и нажми «Принять» → «Установить»." if ru
+                          else "Open the link on your iPhone, get TestFlight, then tap Accept → Install.") + "</p>\n"
+             + f'  <p class="stores"><a class="btn" href="{TESTFLIGHT_URL}" rel="noopener">{APPLE_SVG}'
+             + "<span><small>" + ("Бета для iPhone" if ru else "iPhone beta") + "</small>TestFlight</span></a></p>"
+             if TESTFLIGHT_URL else ""),
             '  <p style="font-size:14px;opacity:.75">' + ("Если Google Play пишет, что приложение недоступно, — напиши мне, я добавлю твою почту Gmail в список тестировщиков." if ru
                       else "If Google Play says the app isn't available, message me and I'll add your Gmail to the tester list.") + "</p>",
         ])
