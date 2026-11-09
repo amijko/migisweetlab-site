@@ -62,7 +62,7 @@ LS_APP_STORE_URL = ""  # https://apps.apple.com/app/id<Apple ID из App Store C
 LS_GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=com.migisweetlab.vault — вписать после публикации
 # Пока сторов нет — бета: тестирование Google Play (кнопка «Стать тестировщиком») и публичная ссылка TestFlight.
 LS_PLAY_TESTING_URL = "https://play.google.com/apps/testing/com.migisweetlab.vault"
-LS_TESTFLIGHT_URL = ""  # https://testflight.apple.com/join/<код> — публичная ссылка из App Store Connect → TestFlight
+LS_TESTFLIGHT_URL = "https://testflight.apple.com/join/XXmGQkaS"  # публичная ссылка TestFlight (iOS-бета)
 # Дата вступления политики в силу (в приложении пока плейсхолдер — подставляем свою).
 LS_POLICY_DATE = {"en": "9 November 2026", "ru": "9 ноября 2026 г."}
 KEEPASSXC_URL = "https://keepassxc.org/"
