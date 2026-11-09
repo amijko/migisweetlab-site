@@ -60,6 +60,9 @@ LS_NAME = "Local Safe"
 # Ссылки на сторы Local Safe: пока пусто — кнопка «Скоро».
 LS_APP_STORE_URL = ""  # https://apps.apple.com/app/id<Apple ID из App Store Connect → App Information>
 LS_GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=com.migisweetlab.vault — вписать после публикации
+# Пока сторов нет — бета: тестирование Google Play (кнопка «Стать тестировщиком») и публичная ссылка TestFlight.
+LS_PLAY_TESTING_URL = "https://play.google.com/apps/testing/com.migisweetlab.vault"
+LS_TESTFLIGHT_URL = ""  # https://testflight.apple.com/join/<код> — публичная ссылка из App Store Connect → TestFlight
 # Дата вступления политики в силу (в приложении пока плейсхолдер — подставляем свою).
 LS_POLICY_DATE = {"en": "9 November 2026", "ru": "9 ноября 2026 г."}
 KEEPASSXC_URL = "https://keepassxc.org/"
@@ -553,6 +556,10 @@ LS_TEXT = {
               "driving licences. No account, no cloud of ours, no tracking: the app has no internet access at all. "
               "Everything lives in one KeePass file that you own. Free, with no ads."),
         soon="Coming soon to iPhone and Android.",
+        beta=("Beta. On Android, tap Become a tester, then install from Google Play. "
+              f'If Play says the app isn’t available, <a href="mailto:{EMAIL}">write to us</a> and we’ll add your Gmail.'),
+        beta_android=("Android beta: tap Become a tester, then install from Google Play. iPhone is coming soon. "
+                      f'If Play says the app isn’t available, <a href="mailto:{EMAIL}">write to us</a>.'),
         title=f"{LS_NAME} — offline vault for passwords and documents",
         desc=(f"{LS_NAME} keeps passwords, bank cards and documents like passports in one encrypted KeePass file "
               "on your phone. No internet access, no account, no ads. For iPhone and Android."),
@@ -598,6 +605,10 @@ LS_TEXT = {
               "водительских прав. Без аккаунта, без нашего облака и без слежки: у приложения вообще нет доступа "
               "в интернет. Всё хранится в одном файле KeePass, и он ваш. Бесплатно и без рекламы."),
         soon="Скоро для iPhone и Android.",
+        beta=("Бета. На Android нажмите «Стать тестировщиком», затем установите из Google Play. "
+              f'Если Play пишет, что приложение недоступно, <a href="mailto:{EMAIL}">напишите нам</a> — добавим ваш Gmail.'),
+        beta_android=("Бета для Android: нажмите «Стать тестировщиком», затем установите из Google Play. iPhone — скоро. "
+                      f'Если Play пишет, что приложение недоступно, <a href="mailto:{EMAIL}">напишите нам</a>.'),
         title=f"{LS_NAME} — офлайн-сейф для паролей и документов",
         desc=(f"{LS_NAME} хранит пароли, банковские карты и документы вроде паспорта в одном зашифрованном файле KeePass "
               "на телефоне. Без интернета, без аккаунта, без рекламы. Для iPhone и Android."),
@@ -642,14 +653,30 @@ LS_TEXT = {
 
 
 def ls_stores(lang):
-    small_ios = "Загрузите в" if lang == "ru" else "Download on the"
-    small_play = "Доступно в" if lang == "ru" else "Get it on"
-    return (store_btn(LS_APP_STORE_URL, APPLE_SVG, small_ios, "App Store")
-            + store_btn(LS_GOOGLE_PLAY_URL, PLAY_SVG, small_play, "Google Play"))
+    """App Store / Google Play, если приложение там уже есть; до этого — бета (TestFlight, тестирование Play);
+    иначе «Скоро». Значки «Download on the App Store» / «Get it on Google Play» — только для опубликованного."""
+    ru = lang == "ru"
+    if LS_APP_STORE_URL:
+        ios = store_btn(LS_APP_STORE_URL, APPLE_SVG, "Загрузите в" if ru else "Download on the", "App Store")
+    elif LS_TESTFLIGHT_URL:
+        ios = store_btn(LS_TESTFLIGHT_URL, APPLE_SVG, "Бета для iPhone" if ru else "iPhone beta on", "TestFlight")
+    else:
+        ios = store_btn("", APPLE_SVG, "Загрузите в" if ru else "Download on the", "App Store")
+    if LS_GOOGLE_PLAY_URL:
+        android = store_btn(LS_GOOGLE_PLAY_URL, PLAY_SVG, "Доступно в" if ru else "Get it on", "Google Play")
+    else:
+        android = store_btn(LS_PLAY_TESTING_URL, PLAY_SVG, "Бета для Android" if ru else "Android beta on", "Google Play")
+    return ios + android
 
 
 def ls_soon(lang, t):
-    return "" if (LS_APP_STORE_URL and LS_GOOGLE_PLAY_URL) else f'<p class="soon-note">{t["soon"]}</p>'
+    if LS_APP_STORE_URL and LS_GOOGLE_PLAY_URL:
+        return ""
+    if LS_APP_STORE_URL or LS_TESTFLIGHT_URL:
+        return f'<p class="soon-note">{t["beta"]}</p>'
+    if LS_GOOGLE_PLAY_URL or LS_PLAY_TESTING_URL:
+        return f'<p class="soon-note">{t["beta_android"]}</p>'
+    return f'<p class="soon-note">{t["soon"]}</p>'
 
 
 # Landing copy (direction B, 09.11.2026): passwords first, then documents, cards and photos.
@@ -889,7 +916,7 @@ def ls_get_page():
     t = LS_TEXT["en"]
     script = f"""<script>
 (function () {{
-  var APP_STORE = {LS_APP_STORE_URL!r}, PLAY = {LS_GOOGLE_PLAY_URL!r};
+  var APP_STORE = {LS_APP_STORE_URL or LS_TESTFLIGHT_URL!r}, PLAY = {LS_GOOGLE_PLAY_URL or LS_PLAY_TESTING_URL!r};
   var ua = navigator.userAgent || "";
   var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0);
   var android = /Android/i.test(ua);
