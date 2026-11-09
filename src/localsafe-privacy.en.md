@@ -6,7 +6,7 @@ Local Safe works without a network. Your data stays on your device.
 
 ## Data collection
 
-Local Safe does not collect, transmit or sell your data. The app has no network calls, no analytics and no third-party SDKs. On Android it does not declare the INTERNET permission.
+Local Safe does not collect, transmit or sell your data. The app has no network calls and no analytics. The only third-party SDK is the Google Play feature delivery library, which the app uses only to check which text recognition modules are installed. On Android it does not declare the INTERNET permission.
 
 ## Storage
 
@@ -26,7 +26,7 @@ On Android the app asks only for biometric authentication (USE_BIOMETRIC) and de
 
 ## Photos
 
-You pick photos with the system photo picker (Android Photo Picker, iOS PHPicker). The app receives only the photos you select and has no access to your whole gallery. Text recognition on photos runs on your device without network: PaddleOCR models on ONNX Runtime on Android, Apple Vision on iOS.
+You pick photos with the system photo picker (Android Photo Picker, iOS PHPicker). The app receives only the photos you select and has no access to your whole gallery. Text recognition on photos runs on your device without network: on Android, Google Play downloads the PaddleOCR models and ONNX Runtime as optional app modules; the app itself does not connect to the network. On iOS it uses Apple Vision.
 
 ## Autofill
 

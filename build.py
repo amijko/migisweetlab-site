@@ -254,16 +254,16 @@ MANROPE = "family=Manrope:wght@500;700;800"
 # Шапка, иконки и цвета страницы — по продукту. Пути от корня сайта.
 SORTIT = dict(name="SortIt", home="sortit/", icon="assets/icon", theme="#ee6a2c", body="", font=NUNITO,
               nav=[("sortit/support/", "Support"), ("sortit/privacy/", "Privacy")], privacy="sortit/privacy/")
-LOCALSAFE = dict(name=LS_NAME, home="localsafe/", icon="assets/localsafe/icon", theme="#0E1A2B", body="ls",
+LOCALSAFE = dict(name=LS_NAME, home="localsafe/", icon="assets/localsafe/icon", theme="#0B1522", body="ls",
                  font=MANROPE, nav=[("localsafe/support/", "Help"), ("localsafe/privacy/", "Privacy"),
                                     ("localsafe/ru/", "RU")],
                  privacy="localsafe/privacy/")
 LOCALSAFE_RU = dict(LOCALSAFE, home="localsafe/ru/", nav=[("localsafe/ru/support/", "Помощь"),
-                                                          ("localsafe/privacy/ru/", "Конфиденциальность"),
+                                                          ("localsafe/privacy/ru/", "Политика"),
                                                           ("localsafe/", "EN")],
                     privacy="localsafe/privacy/ru/")
-STUDIO = dict(name="Migisweetlab", home="", icon="assets/icon", theme="#1F2A37", body="studio",
-              font=NUNITO + "&" + MANROPE, nav=[("sortit/", "SortIt"), ("localsafe/", LS_NAME)], privacy="")
+STUDIO = dict(name="Migisweetlab", home="", icon="assets/icon", theme="#0B0D12", body="studio",
+              font=MANROPE, nav=[("sortit/", "SortIt"), ("localsafe/", LS_NAME)], privacy="")
 
 
 def page(title, desc, body, path, lang="en", head="", product=SORTIT):
@@ -377,28 +377,30 @@ def landing():
 
 
 def studio_home():
-    """/ — витрина студии: карточки приложений. Сами лендинги — /sortit/ и /localsafe/."""
-    c = level_counts()
+    """/ — витрина студии (направление B, 09.11.2026): две большие плитки приложений. Лендинги — /sortit/ и /localsafe/."""
     body = f"""
 <section class="studio-hero">
-  <h1>Small apps, made with care</h1>
-  <p>Migisweetlab is a one-person studio in London making apps for iPhone and Android.
-  No ads, no accounts — just apps that do one thing well.</p>
+  <h1>Two apps. No ads. Made in London.</h1>
+  <p>A one-person studio making small apps for iPhone and Android in the evenings.</p>
 </section>
 <section class="apps">
-  <a class="app-card sortit-card" href="sortit/">
-    <img src="assets/icon-512.png" alt="" width="96" height="96">
-    <span class="kind">Puzzle game</span>
-    <h2>SortIt</h2>
-    <p>A cozy goods-sorting puzzle. Match three of a kind on the shelves: {c["line"]} levels, Zen, Challenge and a Daily level.</p>
-    <span class="more">See the game →</span>
+  <a class="app-tile sortit-tile" href="sortit/">
+    <span class="app-head">
+      <img src="assets/icon-512.png" alt="" width="64" height="64">
+      <span><small>Puzzle game</small><b>SortIt</b></span>
+    </span>
+    <span class="app-line">Sort the shelves. Match three. Relax.</span>
+    <span class="app-go" aria-hidden="true">{ICON_ARROW}</span>
+    <span class="app-phone"><img src="assets/shot-game.webp" alt="A SortIt level" width="585" height="1266" loading="lazy"></span>
   </a>
-  <a class="app-card ls-card" href="localsafe/">
-    <img src="assets/localsafe/icon-512.png" alt="" width="96" height="96">
-    <span class="kind">Password &amp; document vault</span>
-    <h2>{LS_NAME}</h2>
-    <p>Passwords, cards and documents like passports in one encrypted KeePass file. Works fully offline: no internet access at all.</p>
-    <span class="more">See the app →</span>
+  <a class="app-tile ls-tile-home" href="localsafe/">
+    <span class="app-head">
+      <img src="assets/localsafe/icon-512.png" alt="" width="64" height="64">
+      <span><small>Password &amp; document vault</small><b>{LS_NAME}</b></span>
+    </span>
+    <span class="app-line">Passwords off the sticky notes and into an encrypted vault. Documents and photos fit in too.</span>
+    <span class="app-go" aria-hidden="true">{ICON_ARROW}</span>
+    <span class="app-phone"><img src="assets/localsafe/shot-entry.en.webp" alt="A saved login in {LS_NAME}" width="540" height="960" loading="lazy"></span>
   </a>
 </section>
 """
@@ -552,36 +554,6 @@ LS_TEXT = {
               "driving licences. No account, no cloud of ours, no tracking: the app has no internet access at all. "
               "Everything lives in one KeePass file that you own. Free, with no ads."),
         soon="Coming soon to iPhone and Android.",
-        features=[
-            ("📵", "No internet, by design", "The app has no network code, no analytics and no account. "
-             "On Android it doesn't even ask for the internet permission. Nothing leaves your phone through it."),
-            ("🪪", "Made for documents", "Passport, ID card, licence and certificate templates for every country, "
-             "with the right fields. Attach photos and scans. On iPhone, fill the fields from a photo."),
-            ("🔑", "Passwords, cards, autofill", "Logins, bank cards and secure notes, a strong password generator and search. "
-             "Autofill in apps and browsers, unlock with Face ID or your fingerprint."),
-            ("🗂️", "One open KeePass file", "Your vault is a standard KDBX 4 file encrypted with AES-256 and Argon2id. "
-             "No lock-in: it opens in KeePassXC and other KeePass apps."),
-            ("☁️", "Sync your way", "Keep the file in iCloud Drive, Google Drive or any synced folder. "
-             "Before saving, the app merges changes made on your other devices."),
-            ("📥", "Easy to move in", "Import from Safe+ (mySafebox), Chrome, Apple Passwords, Firefox, Bitwarden, "
-             "1Password, LastPass and KeePassXC."),
-        ],
-        desk_h="Use it on your computer, too",
-        desk_p=("Local Safe doesn't need its own desktop app: your vault is a standard KeePass file. On Windows, macOS "
-                "or Linux open it in the free KeePassXC and fill passwords in Chrome with the KeePassXC-Browser extension."),
-        desk_steps=[
-            "Keep the vault file in a cloud folder that you also have on your computer: iCloud Drive, Google Drive, Dropbox or OneDrive.",
-            'Install <a href="{kx}" rel="noopener">KeePassXC</a> and open the same file with your master password.',
-            "In KeePassXC open <b>Tools → Settings → Browser Integration</b>, turn it on and tick Chrome "
-            "(Firefox, Edge, Brave and Vivaldi work too).",
-            'Add <a href="{kxb}" rel="noopener">KeePassXC-Browser</a> to Chrome and click <b>Connect</b>. '
-            "Logins now fill on websites while KeePassXC is unlocked.",
-        ],
-        desk_note=("Edit on one device at a time when you can: Local Safe merges changes made elsewhere before it saves. "
-                   "KeePassXC and KeePassXC-Browser are free open-source projects, not affiliated with Migisweetlab."),
-        shots_h="Screenshots",
-        shots_alt=["Start screen", "A login with the password shown", "Choosing a document type",
-                   "Unlock with biometrics", "Document templates of a country"],
         title=f"{LS_NAME} — offline vault for passwords and documents",
         desc=(f"{LS_NAME} keeps passwords, bank cards and documents like passports in one encrypted KeePass file "
               "on your phone. No internet access, no account, no ads. For iPhone and Android."),
@@ -627,36 +599,6 @@ LS_TEXT = {
               "водительских прав. Без аккаунта, без нашего облака и без слежки: у приложения вообще нет доступа "
               "в интернет. Всё хранится в одном файле KeePass, и он ваш. Бесплатно и без рекламы."),
         soon="Скоро для iPhone и Android.",
-        features=[
-            ("📵", "Без интернета — намеренно", "В приложении нет сетевого кода, аналитики и аккаунта. "
-             "На Android оно даже не просит разрешения на интернет. Через него ничего не уходит с телефона."),
-            ("🪪", "Сделано для документов", "Шаблоны паспортов, удостоверений, прав и свидетельств любой страны "
-             "с нужными полями. Фото и сканы — вложениями. На iPhone поля заполняются по фото."),
-            ("🔑", "Пароли, карты, автозаполнение", "Логины, банковские карты и заметки, генератор надёжных паролей и поиск. "
-             "Автозаполнение в приложениях и браузерах, вход по Face ID или отпечатку."),
-            ("🗂️", "Один открытый файл KeePass", "Сейф — обычный файл KDBX 4, зашифрованный AES-256 и Argon2id. "
-             "Без привязки: он открывается в KeePassXC и других приложениях KeePass."),
-            ("☁️", "Синхронизация как удобно", "Держите файл в iCloud Drive, Google Диске или любой синхронизируемой папке. "
-             "Перед сохранением приложение сливает изменения с других устройств."),
-            ("📥", "Легко переехать", "Импорт из Safe+ (mySafebox), Chrome, «Паролей» Apple, Firefox, Bitwarden, "
-             "1Password, LastPass и KeePassXC."),
-        ],
-        desk_h="И на компьютере",
-        desk_p=("Отдельная программа для компьютера Local Safe не нужна: сейф — обычный файл KeePass. На Windows, macOS "
-                "или Linux откройте его в бесплатном KeePassXC, а пароли в Chrome подставит расширение KeePassXC-Browser."),
-        desk_steps=[
-            "Держите файл сейфа в облачной папке, которая есть и на компьютере: iCloud Drive, Google Диск, Dropbox или OneDrive.",
-            'Установите <a href="{kx}" rel="noopener">KeePassXC</a> и откройте тот же файл своим мастер-паролем.',
-            "В KeePassXC откройте <b>Инструменты → Настройки → Интеграция с браузером</b>, включите её и отметьте Chrome "
-            "(подходят и Firefox, Edge, Brave, Vivaldi).",
-            'Добавьте в Chrome <a href="{kxb}" rel="noopener">KeePassXC-Browser</a> и нажмите <b>Connect</b>. '
-            "Пока KeePassXC разблокирован, логины подставляются на сайтах.",
-        ],
-        desk_note=("По возможности правьте сейф на одном устройстве за раз: перед сохранением Local Safe сливает чужие изменения. "
-                   "KeePassXC и KeePassXC-Browser — бесплатные проекты с открытым кодом, не связанные с Migisweetlab."),
-        shots_h="Скриншоты",
-        shots_alt=["Стартовый экран", "Логин с открытым паролем", "Выбор вида документа",
-                   "Вход по биометрии", "Шаблоны документов страны"],
         title=f"{LS_NAME} — офлайн-сейф для паролей и документов",
         desc=(f"{LS_NAME} хранит пароли, банковские карты и документы вроде паспорта в одном зашифрованном файле KeePass "
               "на телефоне. Без интернета, без аккаунта, без рекламы. Для iPhone и Android."),
@@ -711,50 +653,202 @@ def ls_soon(lang, t):
     return "" if (LS_APP_STORE_URL and LS_GOOGLE_PLAY_URL) else f'<p class="soon-note">{t["soon"]}</p>'
 
 
+# Landing copy (direction B, 09.11.2026): passwords first, then documents, cards and photos.
+LS_LANDING = {
+    "en": dict(
+        h1='Your passwords deserve better than <span class="brass">a sticky note.</span>',
+        lead=("Keep every login in one encrypted vault on your phone, unlock it with your face or fingerprint, "
+              "and let it fill passwords in for you. No account, no internet access."),
+        meta="Free · iPhone and Android · English and Russian",
+        nb_kicker="From the notebook to the vault",
+        nb_h="The notebook by the router has had a good run.",
+        nb_paper="On paper or in Notes",
+        nb_paper_items=["Anyone who finds it can read it",
+                        "Lost with the bag, the phone case or the drawer",
+                        "You still type every password by hand",
+                        "Short, reused passwords because long ones don’t fit"],
+        nb_safe=f"In {LS_NAME}",
+        nb_safe_items=["Encrypted with AES-256 — unreadable without your master password",
+                       "A backup copy is one file you can keep anywhere",
+                       "Logins fill in apps and websites by themselves",
+                       "A generator makes a long, unique password for every site"],
+        nb_import=("Already saved them in Chrome or another app? Import them in a minute: Chrome, Apple Passwords, "
+                   "Firefox, Bitwarden, 1Password, LastPass, KeePassXC and Safe+."),
+        docs_kicker="And while you’re at it",
+        docs_h="Documents, cards and photos — encrypted the same way.",
+        docs_p=("Your passport number, driving licence, bank cards, a scan of the insurance letter. "
+                "Everything sits in the same vault, behind the same master password."),
+        docs_tiles=[("Documents", "Templates for every country, with the right fields"),
+                    ("Bank cards", "Number, expiry, CVV and PIN, hidden until you tap"),
+                    ("Photos and scans", "Attach images and PDFs to any entry, encrypted inside the file"),
+                    ("Secure notes", "Wi-Fi codes, door codes, anything else")],
+        docs_alt=["Choosing a document type", "Document templates of a country"],
+        never_kicker="What it never does",
+        never_h="Trust you can check before you install.",
+        never_p="Look at the permissions on Google Play or the privacy label on the App Store: there is nothing to see.",
+        never_items=["Connects to the internet", "Asks you to make an account", "Stores your master password",
+                     "Shows ads or tracks you", "Locks your data into its own format"],
+        flow_h="Phone, cloud, computer",
+        flow=[("On your phone", "Create a vault, unlock with Face ID or a fingerprint, autofill in apps and browsers."),
+              ("In your cloud", f"Keep the .kdbx file in iCloud Drive or Google Drive. {LS_NAME} merges changes before it saves."),
+              ("On your computer", 'Open the same file in <a href="{kx}" rel="noopener">KeePassXC</a>; '
+                                   '<a href="{kxb}" rel="noopener">KeePassXC-Browser</a> fills logins in Chrome.')],
+        flow_note=("On the computer: in KeePassXC open <b>Tools → Settings → Browser Integration</b> and tick Chrome, "
+                   "then press <b>Connect</b> in the extension. KeePassXC is a free open-source project, "
+                   "not affiliated with Migisweetlab."),
+        sp_h="Moving from Safe+?",
+        sp_p="Import your mySafebox database in a minute — folders, fields and attachments.",
+        sp_btn="How to move",
+        hero_alt=["Unlock with biometrics", "A saved login with the password shown", "Start screen"],
+    ),
+    "ru": dict(
+        h1='Паролям нужно место надёжнее, чем <span class="brass">бумажка.</span>',
+        lead=("Храните все логины в одном зашифрованном сейфе на телефоне, открывайте его лицом или отпечатком — "
+              "пароли подставятся сами. Без аккаунта и без доступа в интернет."),
+        meta="Бесплатно · iPhone и Android · русский и английский",
+        nb_kicker="От блокнота к сейфу",
+        nb_h="Блокнот у роутера своё отслужил.",
+        nb_paper="На бумаге или в Заметках",
+        nb_paper_items=["Прочитает любой, кто найдёт",
+                        "Теряется вместе с сумкой, чехлом или ящиком стола",
+                        "Каждый пароль всё равно вводите руками",
+                        "Короткие и одинаковые пароли — длинные не помещаются"],
+        nb_safe=f"В {LS_NAME}",
+        nb_safe_items=["Зашифровано AES-256 — без мастер-пароля не прочитать",
+                       "Резервная копия — один файл, храните где удобно",
+                       "Логины сами подставляются в приложениях и на сайтах",
+                       "Генератор придумает длинный уникальный пароль для каждого сайта"],
+        nb_import=("Пароли уже в Chrome или другом приложении? Перенесите за минуту: Chrome, «Пароли» Apple, "
+                   "Firefox, Bitwarden, 1Password, LastPass, KeePassXC и Safe+."),
+        docs_kicker="А заодно",
+        docs_h="Документы, карты и фото — зашифрованы так же.",
+        docs_p=("Номер паспорта, права, банковские карты, скан страховки. "
+                "Всё лежит в том же сейфе, за тем же мастер-паролем."),
+        docs_tiles=[("Документы", "Шаблоны любой страны с нужными полями"),
+                    ("Банковские карты", "Номер, срок, CVV и PIN скрыты до касания"),
+                    ("Фото и сканы", "Картинки и PDF в любой записи, внутри зашифрованного файла"),
+                    ("Заметки", "Коды от Wi-Fi и домофона, всё остальное")],
+        docs_alt=["Выбор вида документа", "Шаблоны документов страны"],
+        never_kicker="Чего оно никогда не делает",
+        never_h="Доверие, которое можно проверить до установки.",
+        never_p="Посмотрите разрешения в Google Play или ярлык конфиденциальности в App Store — там пусто.",
+        never_items=["Выходит в интернет", "Просит завести аккаунт", "Хранит ваш мастер-пароль",
+                     "Показывает рекламу или следит", "Запирает данные в своём формате"],
+        flow_h="Телефон, облако, компьютер",
+        flow=[("На телефоне", "Создайте сейф, открывайте по Face ID или отпечатку, автозаполнение в приложениях и браузерах."),
+              ("В облаке", f"Держите файл .kdbx в iCloud Drive или Google Диске. Перед сохранением {LS_NAME} сливает изменения."),
+              ("На компьютере", 'Откройте тот же файл в <a href="{kx}" rel="noopener">KeePassXC</a>; '
+                                '<a href="{kxb}" rel="noopener">KeePassXC-Browser</a> подставит логины в Chrome.')],
+        flow_note=("На компьютере: в KeePassXC откройте <b>Инструменты → Настройки → Интеграция с браузером</b>, "
+                   "отметьте Chrome и нажмите <b>Connect</b> в расширении. KeePassXC — бесплатный проект "
+                   "с открытым кодом, не связанный с Migisweetlab."),
+        sp_h="Переезжаете с Safe+?",
+        sp_p="Импортируйте базу mySafebox за минуту — папки, поля и вложения.",
+        sp_btn="Как перенести",
+        hero_alt=["Вход по биометрии", "Логин с открытым паролем", "Стартовый экран"],
+    ),
+}
+
+ICON_X = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
+          'aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>')
+ICON_V = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" '
+          'stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')
+ICON_ARROW = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" '
+              'stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>')
+
+
 def ls_landing(lang):
-    t = LS_TEXT[lang]
+    t, c = LS_TEXT[lang], LS_LANDING[lang]
     path = "localsafe/index.html" if lang == "en" else "localsafe/ru/index.html"
     up = "../" * path.count("/")
     a = f"{up}assets/localsafe/"
-    feats = "\n".join(f'  <div class="feature"><div class="emo">{e}</div><h3>{h}</h3><p>{p}</p></div>'
-                      for e, h, p in t["features"])
-    steps = "\n".join(f"    <li>{s.format(kx=KEEPASSXC_URL, kxb=KEEPASSXC_BROWSER_URL)}</li>" for s in t["desk_steps"])
-    shots = "\n".join(f'  <img src="{a}{name}.{lang}.webp" alt="{alt}" width="540" height="960" loading="lazy">'
-                      for name, alt in zip(LS_SHOTS, t["shots_alt"]))
+    help_href = "support/"
+    li = lambda icon, text: f"<li>{icon}<span>{text}</span></li>"
+    paper = "\n".join(li(ICON_X, s) for s in c["nb_paper_items"])
+    safe = "\n".join(li(ICON_V, s) for s in c["nb_safe_items"])
+    never = "\n".join(li(ICON_X, s) for s in c["never_items"])
+    tiles = "\n".join(f'<div class="ls-tile"><b>{h}</b><span>{p}</span></div>' for h, p in c["docs_tiles"])
+    flow = "\n".join(f'<div class="ls-step"><span class="n">{i}</span><b>{h}</b>'
+                     f'<span>{p.format(kx=KEEPASSXC_URL, kxb=KEEPASSXC_BROWSER_URL)}</span></div>'
+                     for i, (h, p) in enumerate(c["flow"], 1))
+    hero_shots = [("unlock", "side l"), ("entry", "main"), ("start", "side r")]
+    fan = "\n".join(f'<div class="ls-phone {cls}"><img src="{a}shot-{n}.{lang}.webp" alt="{alt}" width="540" height="960"></div>'
+                    for (n, cls), alt in zip(hero_shots, c["hero_alt"]))
     body = f"""
-<section class="hero">
-  <div>
-    <img class="app-icon" src="{a}icon-512.png" alt="{LS_NAME} app icon" width="104" height="104">
-    <h1>{LS_NAME}</h1>
-    <p class="tag">{t["tag"]}</p>
-    <p>{t["lead"]}</p>
-    <div class="stores">{ls_stores(lang)}</div>
-    {ls_soon(lang, t)}
-  </div>
-  <div class="phone-pair" aria-hidden="true">
-    <div class="phone a"><img src="{a}shot-start.{lang}.webp" alt="" width="540" height="960"></div>
-    <div class="phone b"><img src="{a}shot-entry.{lang}.webp" alt="" width="540" height="960"></div>
+<section class="ls-hero">
+  <img class="ls-hero-icon" src="{a}icon-512.png" alt="{LS_NAME} app icon" width="112" height="112">
+  <h1>{c["h1"]}</h1>
+  <p class="lead">{c["lead"]}</p>
+  <div class="stores">{ls_stores(lang)}</div>
+  {ls_soon(lang, t)}
+  <p class="meta">{c["meta"]}</p>
+  <div class="ls-fan">
+{fan}
   </div>
 </section>
-
-<section class="features">
-{feats}
-</section>
-
-<section class="doc desktop" id="desktop">
-  <h2>{t["desk_h"]}</h2>
-  <p>{t["desk_p"]}</p>
-  <ol>
-{steps}
-  </ol>
-  <p class="note">{t["desk_note"]}</p>
-</section>
-
-<h2 class="section">{t["shots_h"]}</h2>
-<div class="shots">
-{shots}
 </div>
-<div style="height:32px"></div>
+
+<div class="ls-band">
+<div class="wrap">
+<section class="ls-section">
+  <p class="kicker">{c["nb_kicker"]}</p>
+  <h2>{c["nb_h"]}</h2>
+  <div class="ls-compare">
+    <div class="ls-col paper"><h3>{c["nb_paper"]}</h3><ul class="ls-list">
+{paper}
+    </ul></div>
+    <div class="ls-col safe"><h3>{c["nb_safe"]}</h3><ul class="ls-list">
+{safe}
+    </ul></div>
+  </div>
+  <p class="ls-note">{c["nb_import"]}</p>
+</section>
+
+<section class="ls-section ls-split">
+  <div>
+    <p class="kicker">{c["docs_kicker"]}</p>
+    <h2>{c["docs_h"]}</h2>
+    <p class="ls-p">{c["docs_p"]}</p>
+    <div class="ls-tiles">
+{tiles}
+    </div>
+  </div>
+  <div class="ls-duo">
+    <div class="ls-phone"><img src="{a}shot-docs.{lang}.webp" alt="{c["docs_alt"][0]}" width="540" height="960" loading="lazy"></div>
+    <div class="ls-phone low"><img src="{a}shot-templates.{lang}.webp" alt="{c["docs_alt"][1]}" width="540" height="960" loading="lazy"></div>
+  </div>
+</section>
+</div>
+</div>
+
+<div class="ls-band deep">
+<div class="wrap">
+<section class="ls-section ls-split">
+  <div>
+    <p class="kicker">{c["never_kicker"]}</p>
+    <h2>{c["never_h"]}</h2>
+    <p class="ls-p">{c["never_p"]}</p>
+  </div>
+  <ul class="ls-never">
+{never}
+  </ul>
+</section>
+</div>
+</div>
+
+<div class="wrap">
+<section class="ls-section" id="desktop">
+  <h2>{c["flow_h"]}</h2>
+  <div class="ls-steps">
+{flow}
+  </div>
+  <p class="ls-note">{c["flow_note"].format(kx=KEEPASSXC_URL, kxb=KEEPASSXC_BROWSER_URL)}</p>
+</section>
+
+<section class="ls-cta">
+  <div><h2>{c["sp_h"]}</h2><p>{c["sp_p"]}</p></div>
+  <a href="{help_href}">{c["sp_btn"]}</a>
+</section>
 """
     write(path, page(t["title"], t["desc"], body, path, lang=lang,
                      product=LOCALSAFE if lang == "en" else LOCALSAFE_RU))
