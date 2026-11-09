@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Safe — Политика конфиденциальности</title>
+<meta name="description" content="Политика конфиденциальности Local Safe">
+<link rel="canonical" href="https://migisweetlab.com/localsafe/privacy/ru/">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../assets/localsafe/icon-32.png">
+<link rel="apple-touch-icon" href="../../../assets/localsafe/icon-180.png">
+<meta property="og:title" content="Local Safe — Политика конфиденциальности">
+<meta property="og:description" content="Политика конфиденциальности Local Safe">
+<meta property="og:image" content="https://migisweetlab.com/assets/localsafe/icon-512.png">
+<meta property="og:url" content="https://migisweetlab.com/localsafe/privacy/ru/">
+<meta name="theme-color" content="#0E1A2B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../assets/style.css">
+</head>
+<body class="ls">
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="../../../localsafe/ru/"><img src="../../../assets/localsafe/icon-192.png" alt="">Local Safe</a>
+  <nav class="nav">
+    <a href="../../../localsafe/ru/support/">Помощь</a>
+    <a href="../../../localsafe/privacy/ru/">Конфиденциальность</a>
+    <a href="../../../localsafe/">EN</a>
+  </nav>
+</header>
+<article class="doc"><a class="lang" href="../">EN</a><h1>Local Safe — Политика конфиденциальности</h1>
+<p>Дата вступления в силу: 9 ноября 2026 г.</p>
+<p>Local Safe работает без сети. Ваши данные остаются на вашем устройстве.</p>
+<h2>Сбор данных</h2>
+<p>Local Safe не собирает, не передаёт и не продаёт ваши данные. В приложении нет сетевых вызовов, аналитики и сторонних SDK. На Android приложение не объявляет разрешение INTERNET.</p>
+<h2>Хранение</h2>
+<p>Ваше хранилище — один файл KDBX 4 на устройстве. Он зашифрован вашим мастер-паролем. Файл вы выбираете через системный выбор файлов (Storage Access Framework на Android, «Файлы» на iOS). Если вы храните файл в Google Диске или iCloud, эти сервисы синхронизируют его вне приложения по своим правилам. Перед сохранением приложение перечитывает файл и объединяет изменения, сделанные вне приложения.</p>
+<h2>Мастер-пароль</h2>
+<p>Приложение нигде не хранит ваш мастер-пароль. Если вы его забудете, приложение не сможет восстановить хранилище.</p>
+<h2>Биометрия</h2>
+<p>Если вы включите биометрию, приложение сохранит ключ хранилища (производный от пароля) в зашифрованном виде. На Android ключ шифрования лежит в Android Keystore. Он работает только после строгой биометрической проверки и перестаёт работать при добавлении нового отпечатка. На iOS ключ лежит в Keychain. Доступ требует текущего набора биометрии, ключ остаётся только на этом устройстве и сохраняется только при заданном пароле устройства. Приложению недоступны ваши отпечатки и лицо: проверку выполняет система.</p>
+<h2>Разрешения</h2>
+<p>На Android приложение запрашивает только биометрическую проверку (USE_BIOMETRIC) и объявляет службу автозаполнения. На iOS оно использует только описание Face ID и расширение автозаполнения паролей. У приложения нет доступа к камере, контактам, геолокации и сети.</p>
+<h2>Фото</h2>
+<p>Фото вы выбираете через системный выбор фото (Photo Picker на Android, PHPicker на iOS). Приложение получает только выбранные вами фото и не имеет доступа ко всей галерее. Распознавание текста на фото идёт на устройстве без сети: модели PaddleOCR на ONNX Runtime на Android, Apple Vision на iOS.</p>
+<h2>Автозаполнение</h2>
+<p>Автозаполнение подставляет логин и пароль только в поле, которое выбрали вы. Оно никуда их не отправляет.</p>
+<h2>Резервные копии</h2>
+<p>Manifest Android разрешает системные резервные копии. Настройки, список недавних хранилищ и зашифрованный биометрический ключ приложение хранит в папке, исключённой из резервных копий. Файл хранилища остаётся там, где вы его разместили. Ключ из Android Keystore не покидает устройство.</p>
+<h2>Удаление данных</h2>
+<p>Чтобы удалить все данные, удалите файл хранилища и удалите приложение. Удаление приложения стирает его настройки и сохранённый биометрический ключ.</p>
+<h2>Контакт</h2>
+<p>Вопросы об этой политике: <a href="mailto:migisweetlab@gmail.com">migisweetlab@gmail.com</a></p></article>
+<footer>
+  <span>© 2026 <a href="../../../">Migisweetlab</a> · <a href="../../../">Все приложения</a></span>
+  <span><a href="../../../localsafe/privacy/ru/">Политика конфиденциальности</a> · <a href="mailto:migisweetlab@gmail.com">migisweetlab@gmail.com</a></span>
+</footer>
+</div>
+</body>
+</html>

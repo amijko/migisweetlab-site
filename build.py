@@ -37,6 +37,35 @@ SHOTS = {
 SHOT_SIZE = (585, 1266)
 APP_LEVELS = "shared/src/commonMain/composeResources/files/levels"
 
+# --- Local Safe (репозиторий LocalVault) ---
+# Источник правды — репозиторий приложения (LOCALVAULT_REPO, по умолчанию ../LocalVault):
+# - политика — строки privacy_* из composeResources/values{,-ru}/strings.xml → src/localsafe-privacy.*.md;
+# - скриншоты — эталоны Roborazzi (LS_SHOTS) → assets/localsafe/shot-*.webp;
+# - иконки — iOS-иконка 1024 → assets/localsafe/icon-*.png.
+# Если репозитория нет (например, сайт собирается после тикета SortIt на другой машине),
+# эти файлы просто не обновляются — берутся те, что уже лежат в сайте.
+LV = Path(os.environ.get("LOCALVAULT_REPO") or ROOT.parent / "LocalVault").expanduser()
+LV_STRINGS = {"en": "shared/src/commonMain/composeResources/values/strings.xml",
+              "ru": "shared/src/commonMain/composeResources/values-ru/strings.xml"}
+LV_SNAPSHOTS = "shared/src/androidHostTest/snapshots"
+LV_ICON = "iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png"
+LS_SHOTS = {  # эталон 720×1280 → 540×960 на сайте; {L} — English / Russian
+    "shot-start": "StartScreenshotTest.startScreenWithRecents{L}.png",
+    "shot-entry": "EntryScreenshotTest.entryPasswordShown{L}.png",
+    "shot-docs": "EntryFormScreenshotTest.documentKindPicker{L}.png",
+    "shot-unlock": "UnlockScreenshotTest.unlockWithBiometrics{L}.png",
+    "shot-templates": "CountryTemplatesScreenshotTest.countryTemplates{L}.png",
+}
+LS_SHOT_SIZE = (540, 960)
+LS_NAME = "Local Safe"
+# Ссылки на сторы Local Safe: пока пусто — кнопка «Скоро».
+LS_APP_STORE_URL = ""  # https://apps.apple.com/app/id<Apple ID из App Store Connect → App Information>
+LS_GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=com.migisweetlab.vault — вписать после публикации
+# Дата вступления политики в силу (в приложении пока плейсхолдер — подставляем свою).
+LS_POLICY_DATE = {"en": "9 November 2026", "ru": "9 ноября 2026 г."}
+KEEPASSXC_URL = "https://keepassxc.org/"
+KEEPASSXC_BROWSER_URL = "https://chromewebstore.google.com/detail/keepassxc-browser/oboonakemofpalcgghocfoadofidjkkk"
+
 
 
 def _inline(text: str) -> str:
@@ -124,6 +153,56 @@ def synced_files():
         buf = io.BytesIO()
         im.save(buf, "WEBP", quality=88, method=6)
         out[f"assets/{site_name}"] = buf.getvalue()
+    out.update(localsafe_files())
+    return out
+
+
+def _android_string(raw: str) -> str:
+    """Текст строкового ресурса Android/Compose → обычный текст."""
+    return (raw.replace("\\'", "'").replace('\\"', '"').replace("\\n", "\n").strip())
+
+
+def localsafe_policy_md(lang: str) -> str:
+    """Политика Local Safe в Markdown из строк приложения (тот же текст, что на экране «Политика»)."""
+    import xml.etree.ElementTree as ET
+    root = ET.parse(LV / LV_STRINGS[lang]).getroot()
+    s = {e.get("name"): _android_string("".join(e.itertext())) for e in root.findall("string")}
+    sections = ["collection", "storage", "password", "biometrics", "permissions", "photos",
+                "autofill", "backup", "deletion", "contact"]  # порядок как в PrivacyPolicySection.kt
+    date = s["privacy_effective_date"]
+    if "[" in date:  # в приложении плейсхолдер
+        date = ("Effective date: " if lang == "en" else "Дата вступления в силу: ") + LS_POLICY_DATE[lang]
+    lines = [f"# {LS_NAME} — {s['privacy_title']}", "", date, "", s["privacy_intro"], ""]
+    for key in sections:
+        body = s[f"privacy_{key}_body"]
+        if key == "contact" and body.startswith("["):
+            body = ("Questions about this policy: " if lang == "en" else "Вопросы об этой политике: ") + EMAIL
+        lines += [f"## {s[f'privacy_{key}_title']}", "", body, ""]
+    # Приложение переименовано в Local Safe (09.11.2026); пока строки в нём не обновлены — меняем здесь.
+    return "\n".join(lines).replace("LocalVault", LS_NAME)
+
+
+def localsafe_files():
+    """Файлы сайта из репозитория LocalVault: путь → байты. Пусто, если репозитория нет."""
+    from PIL import Image
+    if not (LV / LV_STRINGS["en"]).is_file():
+        print(f"Нет репозитория LocalVault ({LV}): Local Safe не обновляю (задай LOCALVAULT_REPO)")
+        return {}
+    out = {}
+    for lang in ("en", "ru"):
+        out[f"src/localsafe-privacy.{lang}.md"] = localsafe_policy_md(lang).encode("utf-8")
+    for name, golden in LS_SHOTS.items():
+        for lang, word in (("en", "English"), ("ru", "Russian")):
+            im = Image.open(LV / LV_SNAPSHOTS / golden.format(L=word)).convert("RGB")
+            im = im.resize(LS_SHOT_SIZE, Image.LANCZOS)
+            buf = io.BytesIO()
+            im.save(buf, "WEBP", quality=88, method=6)
+            out[f"assets/localsafe/{name}.{lang}.webp"] = buf.getvalue()
+    icon = Image.open(LV / LV_ICON).convert("RGB")
+    for size in (32, 180, 192, 512):
+        buf = io.BytesIO()
+        icon.resize((size, size), Image.LANCZOS).save(buf, "PNG", optimize=True)
+        out[f"assets/localsafe/icon-{size}.png"] = buf.getvalue()
     return out
 
 
@@ -139,6 +218,7 @@ def sync_from_app(check=False):
         if not same:
             stale.append(rel)
             if not check:
+                path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(data)
     return stale
 
@@ -169,10 +249,34 @@ def ios_btn():
     return store_btn("", APPLE_SVG, "Download on the", "App Store")
 
 
-def page(title, desc, body, path, lang="en", head=""):
+NUNITO = "family=Nunito:wght@400;700;800;900"
+MANROPE = "family=Manrope:wght@500;700;800"
+# Шапка, иконки и цвета страницы — по продукту. Пути от корня сайта.
+SORTIT = dict(name="SortIt", home="sortit/", icon="assets/icon", theme="#ee6a2c", body="", font=NUNITO,
+              nav=[("sortit/support/", "Support"), ("sortit/privacy/", "Privacy")], privacy="sortit/privacy/")
+LOCALSAFE = dict(name=LS_NAME, home="localsafe/", icon="assets/localsafe/icon", theme="#0E1A2B", body="ls",
+                 font=MANROPE, nav=[("localsafe/support/", "Help"), ("localsafe/privacy/", "Privacy"),
+                                    ("localsafe/ru/", "RU")],
+                 privacy="localsafe/privacy/")
+LOCALSAFE_RU = dict(LOCALSAFE, home="localsafe/ru/", nav=[("localsafe/ru/support/", "Помощь"),
+                                                          ("localsafe/privacy/ru/", "Конфиденциальность"),
+                                                          ("localsafe/", "EN")],
+                    privacy="localsafe/privacy/ru/")
+STUDIO = dict(name="Migisweetlab", home="", icon="assets/icon", theme="#1F2A37", body="studio",
+              font=NUNITO + "&" + MANROPE, nav=[("sortit/", "SortIt"), ("localsafe/", LS_NAME)], privacy="")
+
+
+def page(title, desc, body, path, lang="en", head="", product=SORTIT):
     depth = path.count("/")
     up = "../" * depth
     canon = SITE + "/" + path.replace("index.html", "")
+    p = product
+    brand_img = "" if p is STUDIO else f'<img src="{up}{p["icon"]}-192.png" alt="">'
+    nav = "\n".join(f'    <a href="{up}{href}">{label}</a>' for href, label in p["nav"])
+    privacy = (f'<a href="{up}{p["privacy"]}">{"Политика конфиденциальности" if lang == "ru" else "Privacy Policy"}</a> · '
+               if p["privacy"] else "")
+    apps = "" if p is STUDIO else f' · <a href="{up or "./"}">{"Все приложения" if lang == "ru" else "All apps"}</a>'
+    body_cls = f' class="{p["body"]}"' if p["body"] else ""
     return f"""<!doctype html>
 <html lang="{lang}">
 <head>
@@ -181,31 +285,30 @@ def page(title, desc, body, path, lang="en", head=""):
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="{canon}">
-<link rel="icon" type="image/png" sizes="32x32" href="{up}assets/icon-32.png">
-<link rel="apple-touch-icon" href="{up}assets/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="{up}{p["icon"]}-32.png">
+<link rel="apple-touch-icon" href="{up}{p["icon"]}-180.png">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<meta property="og:image" content="{SITE}/assets/icon-512.png">
+<meta property="og:image" content="{SITE}/{p["icon"]}-512.png">
 <meta property="og:url" content="{canon}">
-<meta name="theme-color" content="#ee6a2c">
+<meta name="theme-color" content="{p["theme"]}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?{p["font"]}&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{up}assets/style.css">
 {head}</head>
-<body>
+<body{body_cls}>
 <div class="wrap">
 <header class="top">
-  <a class="brand" href="{up or './'}"><img src="{up}assets/icon-192.png" alt="">SortIt</a>
+  <a class="brand" href="{up}{p["home"] or './'}">{brand_img}{p["name"]}</a>
   <nav class="nav">
-    <a href="{up}sortit/support/">Support</a>
-    <a href="{up}sortit/privacy/">Privacy</a>
+{nav}
   </nav>
 </header>
 {body}
 <footer>
-  <span>© 2026 Migisweetlab</span>
-  <span><a href="{up}sortit/privacy/">Privacy Policy</a> · <a href="mailto:{EMAIL}">{EMAIL}</a></span>
+  <span>© 2026 <a href="{up or './'}">Migisweetlab</a>{apps}</span>
+  <span>{privacy}<a href="mailto:{EMAIL}">{EMAIL}</a></span>
 </footer>
 </div>
 </body>
@@ -235,7 +338,7 @@ def landing():
     body = f"""
 <section class="hero">
   <div>
-    <img class="app-icon" src="assets/icon-512.png" alt="SortIt app icon" width="104" height="104">
+    <img class="app-icon" src="../assets/icon-512.png" alt="SortIt app icon" width="104" height="104">
     <h1>SortIt</h1>
     <p class="tag">Sort the shelves. Match three. Relax.</p>
     <p>A cozy goods-sorting puzzle: tap items on the shelves and put three of a kind together to clear them.
@@ -245,8 +348,8 @@ def landing():
     {soon}
   </div>
   <div class="phone-pair" aria-hidden="true">
-    <div class="phone a"><img src="assets/shot-home.webp" alt="" width="585" height="1266"></div>
-    <div class="phone b"><img src="assets/shot-game.webp" alt="" width="585" height="1266"></div>
+    <div class="phone a"><img src="../assets/shot-home.webp" alt="" width="585" height="1266"></div>
+    <div class="phone b"><img src="../assets/shot-game.webp" alt="" width="585" height="1266"></div>
   </div>
 </section>
 
@@ -261,20 +364,47 @@ def landing():
 
 <h2 class="section">Screenshots</h2>
 <div class="shots">
-  <img src="assets/shot-game.webp" alt="Level 21: shelves full of snacks and drinks" width="585" height="1266" loading="lazy">
-  <img src="assets/shot-shelves.webp" alt="Wall shelves level" width="585" height="1266" loading="lazy">
-  <img src="assets/shot-home.webp" alt="Home screen with Daily level and Challenge" width="585" height="1266" loading="lazy">
-  <img src="assets/shot-sets.webp" alt="Level sets" width="585" height="1266" loading="lazy">
+  <img src="../assets/shot-game.webp" alt="Level 21: shelves full of snacks and drinks" width="585" height="1266" loading="lazy">
+  <img src="../assets/shot-shelves.webp" alt="Wall shelves level" width="585" height="1266" loading="lazy">
+  <img src="../assets/shot-home.webp" alt="Home screen with Daily level and Challenge" width="585" height="1266" loading="lazy">
+  <img src="../assets/shot-sets.webp" alt="Level sets" width="585" height="1266" loading="lazy">
 </div>
 <div style="height:32px"></div>
 """
-    write("index.html", page("SortIt — cozy goods-sorting puzzle",
-                             f"Sort the shelves, match three and relax. {c['line']} levels, Zen, a Daily level and Challenge mode. By Migisweetlab.",
-                             body, "index.html"))
-    # /sortit/ ведёт на главную, чтобы ссылка migisweetlab.com/sortit тоже работала
-    write("sortit/index.html", f"""<!doctype html><meta charset="utf-8"><title>SortIt</title>
-<link rel="canonical" href="{SITE}/"><meta http-equiv="refresh" content="0; url=../"><a href="../">SortIt</a>
-""")
+    write("sortit/index.html", page("SortIt — cozy goods-sorting puzzle",
+                                    f"Sort the shelves, match three and relax. {c['line']} levels, Zen, a Daily level and Challenge mode. By Migisweetlab.",
+                                    body, "sortit/index.html"))
+
+
+def studio_home():
+    """/ — витрина студии: карточки приложений. Сами лендинги — /sortit/ и /localsafe/."""
+    c = level_counts()
+    body = f"""
+<section class="studio-hero">
+  <h1>Small apps, made with care</h1>
+  <p>Migisweetlab is a one-person studio in London making apps for iPhone and Android.
+  No ads, no accounts — just apps that do one thing well.</p>
+</section>
+<section class="apps">
+  <a class="app-card sortit-card" href="sortit/">
+    <img src="assets/icon-512.png" alt="" width="96" height="96">
+    <span class="kind">Puzzle game</span>
+    <h2>SortIt</h2>
+    <p>A cozy goods-sorting puzzle. Match three of a kind on the shelves: {c["line"]} levels, Zen, Challenge and a Daily level.</p>
+    <span class="more">See the game →</span>
+  </a>
+  <a class="app-card ls-card" href="localsafe/">
+    <img src="assets/localsafe/icon-512.png" alt="" width="96" height="96">
+    <span class="kind">Password &amp; document vault</span>
+    <h2>{LS_NAME}</h2>
+    <p>Passwords, cards and documents like passports in one encrypted KeePass file. Works fully offline: no internet access at all.</p>
+    <span class="more">See the app →</span>
+  </a>
+</section>
+"""
+    write("index.html", page("Migisweetlab — small apps for iPhone and Android",
+                             f"Migisweetlab makes SortIt, a cozy sorting puzzle, and {LS_NAME}, an offline vault for passwords and documents.",
+                             body, "index.html", product=STUDIO))
 
 
 def get_page():
@@ -319,7 +449,7 @@ def get_page():
   <p>A cozy goods-sorting puzzle with a new Daily level every day. No ads, no in-app purchases, plays offline.</p>
   <div class="stores" style="justify-content:center">{stores}</div>
   {soon}
-  <p style="margin-top:18px;font-size:14px"><a href="../../">More about the game</a></p>
+  <p style="margin-top:18px;font-size:14px"><a href="../">More about the game</a></p>
 </section>
 """
     write("sortit/get/index.html", page("Play SortIt — cozy goods-sorting puzzle",
@@ -404,16 +534,312 @@ def support():
 
 
 def not_found():
-    body = '<article class="doc" style="text-align:center"><h1>Page not found</h1><p><a href="/">Back to SortIt</a></p></article>'
-    html = page("Page not found — SortIt", "Page not found", body, "404.html")
+    body = '<article class="doc" style="text-align:center"><h1>Page not found</h1><p><a href="/">Back to Migisweetlab</a></p></article>'
+    html = page("Page not found — Migisweetlab", "Page not found", body, "404.html", product=STUDIO)
     # 404 отдаётся с любого пути, поэтому пути абсолютные
     html = html.replace('href="assets/', 'href="/assets/').replace('src="assets/', 'src="/assets/')
-    html = html.replace('href="sortit/', 'href="/sortit/').replace('href="./"', 'href="/"')
+    html = html.replace('href="sortit/', 'href="/sortit/').replace('href="localsafe/', 'href="/localsafe/')
+    html = html.replace('href="./"', 'href="/"')
     write("404.html", html)
 
 
+# ---------------------------------------------------------------- Local Safe
+
+LS_TEXT = {
+    "en": dict(
+        tag="Your passwords and documents. Offline, on your phone.",
+        lead=("An encrypted vault for passwords, bank cards, notes and documents — passports, ID cards, "
+              "driving licences. No account, no cloud of ours, no tracking: the app has no internet access at all. "
+              "Everything lives in one KeePass file that you own. Free, with no ads."),
+        soon="Coming soon to iPhone and Android.",
+        features=[
+            ("📵", "No internet, by design", "The app has no network code, no analytics and no account. "
+             "On Android it doesn't even ask for the internet permission. Nothing leaves your phone through it."),
+            ("🪪", "Made for documents", "Passport, ID card, licence and certificate templates for every country, "
+             "with the right fields. Attach photos and scans. On iPhone, fill the fields from a photo."),
+            ("🔑", "Passwords, cards, autofill", "Logins, bank cards and secure notes, a strong password generator and search. "
+             "Autofill in apps and browsers, unlock with Face ID or your fingerprint."),
+            ("🗂️", "One open KeePass file", "Your vault is a standard KDBX 4 file encrypted with AES-256 and Argon2id. "
+             "No lock-in: it opens in KeePassXC and other KeePass apps."),
+            ("☁️", "Sync your way", "Keep the file in iCloud Drive, Google Drive or any synced folder. "
+             "Before saving, the app merges changes made on your other devices."),
+            ("📥", "Easy to move in", "Import from Safe+ (mySafebox), Chrome, Apple Passwords, Firefox, Bitwarden, "
+             "1Password, LastPass and KeePassXC."),
+        ],
+        desk_h="Use it on your computer, too",
+        desk_p=("Local Safe doesn't need its own desktop app: your vault is a standard KeePass file. On Windows, macOS "
+                "or Linux open it in the free KeePassXC and fill passwords in Chrome with the KeePassXC-Browser extension."),
+        desk_steps=[
+            "Keep the vault file in a cloud folder that you also have on your computer: iCloud Drive, Google Drive, Dropbox or OneDrive.",
+            'Install <a href="{kx}" rel="noopener">KeePassXC</a> and open the same file with your master password.',
+            "In KeePassXC open <b>Tools → Settings → Browser Integration</b>, turn it on and tick Chrome "
+            "(Firefox, Edge, Brave and Vivaldi work too).",
+            'Add <a href="{kxb}" rel="noopener">KeePassXC-Browser</a> to Chrome and click <b>Connect</b>. '
+            "Logins now fill on websites while KeePassXC is unlocked.",
+        ],
+        desk_note=("Edit on one device at a time when you can: Local Safe merges changes made elsewhere before it saves. "
+                   "KeePassXC and KeePassXC-Browser are free open-source projects, not affiliated with Migisweetlab."),
+        shots_h="Screenshots",
+        shots_alt=["Start screen", "A login with the password shown", "Choosing a document type",
+                   "Unlock with biometrics", "Document templates of a country"],
+        title=f"{LS_NAME} — offline vault for passwords and documents",
+        desc=(f"{LS_NAME} keeps passwords, bank cards and documents like passports in one encrypted KeePass file "
+              "on your phone. No internet access, no account, no ads. For iPhone and Android."),
+        help_h="Help",
+        help_intro="Questions, a bug, or a document template your country is missing? Write to us — we read every message.",
+        help_tip=("Please include your phone model, OS version and app version (Settings, at the bottom). "
+                  "Never send us your master password or vault file."),
+        faq=[
+            ("I forgot my master password. Can you recover it?",
+             "No. The master password is never stored, and the vault can't be opened without it — not by us, not by anyone. "
+             "Keep it somewhere safe, for example written down at home."),
+            ("How do I turn on autofill on iPhone?",
+             "Open <b>Settings → General → AutoFill &amp; Passwords</b> and turn on Local Safe (on iOS 17: "
+             "<b>Settings → Passwords → Password Options</b>)."),
+            ("How do I turn on autofill on Android and in Chrome?",
+             "Open Local Safe <b>Settings → Autofill</b> and choose it as the autofill service (in Android settings this "
+             "is usually <b>Passwords, passkeys &amp; accounts → Preferred service</b>). Then in Chrome open "
+             "<b>⋮ → Settings → Autofill services</b>, choose <b>Autofill using another service</b> and restart Chrome."),
+            ("Can I use my vault on a computer?",
+             'Yes — open the same file in KeePassXC and use the KeePassXC-Browser extension in Chrome. '
+             'See <a href="{home}#desktop">the steps</a>.'),
+            ("How do I sync between my phone and other devices?",
+             "Keep the vault file in iCloud Drive, Google Drive or another synced folder and open it from there. "
+             "The cloud app syncs the file; Local Safe re-reads it and merges changes before every save."),
+            ("How do I back up my vault?",
+             "Your vault is one .kdbx file. Copy it somewhere safe from time to time — a computer, a USB stick or a second "
+             "cloud. Cloud drives also keep older versions of the file."),
+            ("I used Safe+ (mySafebox). How do I move my data?",
+             "Open <b>Settings → Import → Safe+</b>. On Android choose the folder <code>mySafeboxPro/DB</code> in the phone "
+             "storage. On iPhone first copy the DB folder to the Files app, then choose it."),
+            ("Does the app need the internet?",
+             "No. It has no network code, no analytics and no ads. Syncing is done by your cloud app, not by Local Safe."),
+            ("Is it free?", "Yes. No ads and no subscription."),
+        ],
+        faq_h="FAQ",
+        policy_desc=f"{LS_NAME} privacy policy",
+        get_h=f"Get {LS_NAME}",
+        more="More about the app",
+    ),
+    "ru": dict(
+        tag="Пароли и документы. Без интернета, на вашем телефоне.",
+        lead=("Зашифрованный сейф для паролей, банковских карт, заметок и документов — паспортов, удостоверений, "
+              "водительских прав. Без аккаунта, без нашего облака и без слежки: у приложения вообще нет доступа "
+              "в интернет. Всё хранится в одном файле KeePass, и он ваш. Бесплатно и без рекламы."),
+        soon="Скоро для iPhone и Android.",
+        features=[
+            ("📵", "Без интернета — намеренно", "В приложении нет сетевого кода, аналитики и аккаунта. "
+             "На Android оно даже не просит разрешения на интернет. Через него ничего не уходит с телефона."),
+            ("🪪", "Сделано для документов", "Шаблоны паспортов, удостоверений, прав и свидетельств любой страны "
+             "с нужными полями. Фото и сканы — вложениями. На iPhone поля заполняются по фото."),
+            ("🔑", "Пароли, карты, автозаполнение", "Логины, банковские карты и заметки, генератор надёжных паролей и поиск. "
+             "Автозаполнение в приложениях и браузерах, вход по Face ID или отпечатку."),
+            ("🗂️", "Один открытый файл KeePass", "Сейф — обычный файл KDBX 4, зашифрованный AES-256 и Argon2id. "
+             "Без привязки: он открывается в KeePassXC и других приложениях KeePass."),
+            ("☁️", "Синхронизация как удобно", "Держите файл в iCloud Drive, Google Диске или любой синхронизируемой папке. "
+             "Перед сохранением приложение сливает изменения с других устройств."),
+            ("📥", "Легко переехать", "Импорт из Safe+ (mySafebox), Chrome, «Паролей» Apple, Firefox, Bitwarden, "
+             "1Password, LastPass и KeePassXC."),
+        ],
+        desk_h="И на компьютере",
+        desk_p=("Отдельная программа для компьютера Local Safe не нужна: сейф — обычный файл KeePass. На Windows, macOS "
+                "или Linux откройте его в бесплатном KeePassXC, а пароли в Chrome подставит расширение KeePassXC-Browser."),
+        desk_steps=[
+            "Держите файл сейфа в облачной папке, которая есть и на компьютере: iCloud Drive, Google Диск, Dropbox или OneDrive.",
+            'Установите <a href="{kx}" rel="noopener">KeePassXC</a> и откройте тот же файл своим мастер-паролем.',
+            "В KeePassXC откройте <b>Инструменты → Настройки → Интеграция с браузером</b>, включите её и отметьте Chrome "
+            "(подходят и Firefox, Edge, Brave, Vivaldi).",
+            'Добавьте в Chrome <a href="{kxb}" rel="noopener">KeePassXC-Browser</a> и нажмите <b>Connect</b>. '
+            "Пока KeePassXC разблокирован, логины подставляются на сайтах.",
+        ],
+        desk_note=("По возможности правьте сейф на одном устройстве за раз: перед сохранением Local Safe сливает чужие изменения. "
+                   "KeePassXC и KeePassXC-Browser — бесплатные проекты с открытым кодом, не связанные с Migisweetlab."),
+        shots_h="Скриншоты",
+        shots_alt=["Стартовый экран", "Логин с открытым паролем", "Выбор вида документа",
+                   "Вход по биометрии", "Шаблоны документов страны"],
+        title=f"{LS_NAME} — офлайн-сейф для паролей и документов",
+        desc=(f"{LS_NAME} хранит пароли, банковские карты и документы вроде паспорта в одном зашифрованном файле KeePass "
+              "на телефоне. Без интернета, без аккаунта, без рекламы. Для iPhone и Android."),
+        help_h="Помощь",
+        help_intro="Вопрос, ошибка или нет шаблона документа вашей страны? Напишите нам — читаем каждое письмо.",
+        help_tip=("Укажите модель телефона, версию системы и версию приложения (внизу «Настроек»). "
+                  "Никогда не присылайте мастер-пароль или файл сейфа."),
+        faq=[
+            ("Я забыл мастер-пароль. Можно его восстановить?",
+             "Нет. Мастер-пароль нигде не хранится, и без него сейф не открыть — ни нам, ни кому-либо ещё. "
+             "Храните его в надёжном месте, например записанным дома."),
+            ("Как включить автозаполнение на iPhone?",
+             "Откройте <b>Настройки → Основные → Автозаполнение и пароли</b> и включите Local Safe (в iOS 17 — "
+             "<b>Настройки → Пароли → Параметры паролей</b>)."),
+            ("Как включить автозаполнение на Android и в Chrome?",
+             "В Local Safe откройте <b>Настройки → Автозаполнение</b> и выберите его службой автозаполнения (в настройках "
+             "Android это обычно <b>Пароли, ключи доступа и аккаунты → Предпочтительный сервис</b>). Затем в Chrome: "
+             "<b>⋮ → Настройки → Службы автозаполнения</b>, выберите <b>Автозаполнение с помощью другого сервиса</b> "
+             "и перезапустите Chrome."),
+            ("Можно ли пользоваться сейфом на компьютере?",
+             'Да — откройте тот же файл в KeePassXC и подключите расширение KeePassXC-Browser в Chrome. '
+             '<a href="{home}#desktop">Как это сделать</a>.'),
+            ("Как синхронизировать телефон и другие устройства?",
+             "Держите файл сейфа в iCloud Drive, Google Диске или другой синхронизируемой папке и открывайте его оттуда. "
+             "Файл синхронизирует облачное приложение, а Local Safe перед каждым сохранением перечитывает его и сливает изменения."),
+            ("Как сделать резервную копию?",
+             "Сейф — один файл .kdbx. Время от времени копируйте его в надёжное место: на компьютер, флешку или во второе облако. "
+             "Облачные диски к тому же хранят старые версии файла."),
+            ("Я пользовался Safe+ (mySafebox). Как перенести данные?",
+             "Откройте <b>Настройки → Импорт → Safe+</b>. На Android выберите папку <code>mySafeboxPro/DB</code> в памяти "
+             "телефона. На iPhone сначала скопируйте папку DB в приложение «Файлы», затем выберите её."),
+            ("Приложению нужен интернет?",
+             "Нет. В нём нет сетевого кода, аналитики и рекламы. Синхронизацию делает ваше облачное приложение, а не Local Safe."),
+            ("Это бесплатно?", "Да. Без рекламы и без подписки."),
+        ],
+        faq_h="Вопросы и ответы",
+        policy_desc=f"Политика конфиденциальности {LS_NAME}",
+        get_h=f"Скачать {LS_NAME}",
+        more="Подробнее о приложении",
+    ),
+}
+
+
+def ls_stores(lang):
+    small_ios = "Загрузите в" if lang == "ru" else "Download on the"
+    small_play = "Доступно в" if lang == "ru" else "Get it on"
+    return (store_btn(LS_APP_STORE_URL, APPLE_SVG, small_ios, "App Store")
+            + store_btn(LS_GOOGLE_PLAY_URL, PLAY_SVG, small_play, "Google Play"))
+
+
+def ls_soon(lang, t):
+    return "" if (LS_APP_STORE_URL and LS_GOOGLE_PLAY_URL) else f'<p class="soon-note">{t["soon"]}</p>'
+
+
+def ls_landing(lang):
+    t = LS_TEXT[lang]
+    path = "localsafe/index.html" if lang == "en" else "localsafe/ru/index.html"
+    up = "../" * path.count("/")
+    a = f"{up}assets/localsafe/"
+    feats = "\n".join(f'  <div class="feature"><div class="emo">{e}</div><h3>{h}</h3><p>{p}</p></div>'
+                      for e, h, p in t["features"])
+    steps = "\n".join(f"    <li>{s.format(kx=KEEPASSXC_URL, kxb=KEEPASSXC_BROWSER_URL)}</li>" for s in t["desk_steps"])
+    shots = "\n".join(f'  <img src="{a}{name}.{lang}.webp" alt="{alt}" width="540" height="960" loading="lazy">'
+                      for name, alt in zip(LS_SHOTS, t["shots_alt"]))
+    body = f"""
+<section class="hero">
+  <div>
+    <img class="app-icon" src="{a}icon-512.png" alt="{LS_NAME} app icon" width="104" height="104">
+    <h1>{LS_NAME}</h1>
+    <p class="tag">{t["tag"]}</p>
+    <p>{t["lead"]}</p>
+    <div class="stores">{ls_stores(lang)}</div>
+    {ls_soon(lang, t)}
+  </div>
+  <div class="phone-pair" aria-hidden="true">
+    <div class="phone a"><img src="{a}shot-start.{lang}.webp" alt="" width="540" height="960"></div>
+    <div class="phone b"><img src="{a}shot-entry.{lang}.webp" alt="" width="540" height="960"></div>
+  </div>
+</section>
+
+<section class="features">
+{feats}
+</section>
+
+<section class="doc desktop" id="desktop">
+  <h2>{t["desk_h"]}</h2>
+  <p>{t["desk_p"]}</p>
+  <ol>
+{steps}
+  </ol>
+  <p class="note">{t["desk_note"]}</p>
+</section>
+
+<h2 class="section">{t["shots_h"]}</h2>
+<div class="shots">
+{shots}
+</div>
+<div style="height:32px"></div>
+"""
+    write(path, page(t["title"], t["desc"], body, path, lang=lang,
+                     product=LOCALSAFE if lang == "en" else LOCALSAFE_RU))
+
+
+def ls_support(lang):
+    t = LS_TEXT[lang]
+    path = "localsafe/support/index.html" if lang == "en" else "localsafe/ru/support/index.html"
+    home = "../" if lang == "en" else "../"
+    faq = "\n".join(f"  <p><b>{q}</b><br>{a.format(home=home)}</p>" for q, a in t["faq"])
+    subject = "Local%20Safe%20support"
+    body = f"""
+<article class="doc">
+  <h1>{t["help_h"]}</h1>
+  <p>{t["help_intro"]}</p>
+  <p style="font-size:20px;font-weight:800"><a href="mailto:{EMAIL}?subject={subject}">{EMAIL}</a></p>
+  <p>{t["help_tip"]}</p>
+  <h2>{t["faq_h"]}</h2>
+{faq}
+</article>
+"""
+    write(path, page(f"{LS_NAME} — {t['help_h']}", t["help_intro"], body, path, lang=lang,
+                     product=LOCALSAFE if lang == "en" else LOCALSAFE_RU))
+
+
+def ls_policy(lang):
+    t = LS_TEXT[lang]
+    path = "localsafe/privacy/index.html" if lang == "en" else "localsafe/privacy/ru/index.html"
+    md = (ROOT / "src" / f"localsafe-privacy.{lang}.md").read_text(encoding="utf-8")
+    html = (markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"]) if markdown else md_to_html(md))
+    html = html.replace(EMAIL, f'<a href="mailto:{EMAIL}">{EMAIL}</a>')
+    other = ('<a class="lang" href="ru/">RU</a>' if lang == "en" else '<a class="lang" href="../">EN</a>')
+    title = md.splitlines()[0].lstrip("# ").strip()
+    write(path, page(title, t["policy_desc"], f'<article class="doc">{other}{html}</article>', path, lang=lang,
+                     product=LOCALSAFE if lang == "en" else LOCALSAFE_RU))
+
+
+def ls_get_page():
+    """/localsafe/get/ — одна ссылка на оба стора: отправляет по ОС телефона, иначе показывает кнопки."""
+    t = LS_TEXT["en"]
+    script = f"""<script>
+(function () {{
+  var APP_STORE = {LS_APP_STORE_URL!r}, PLAY = {LS_GOOGLE_PLAY_URL!r};
+  var ua = navigator.userAgent || "";
+  var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 0);
+  var android = /Android/i.test(ua);
+  var src = "share";
+  try {{ src = (new URLSearchParams(location.search).get("src") || "share").replace(/[^\\w-]/g, "").slice(0, 40) || "share"; }} catch (e) {{}}
+  var url = "";
+  if (android && PLAY) url = PLAY + (PLAY.indexOf("?") < 0 ? "?" : "&") + "referrer=" + encodeURIComponent("utm_source=" + src + "&utm_medium=link");
+  else if (ios && APP_STORE) url = APP_STORE;
+  if (url) {{ document.documentElement.className += " redirecting"; location.replace(url); }}
+}})();
+</script>
+<style>.redirecting .get-hero {{ visibility: hidden; }}</style>
+"""
+    body = f"""
+<section class="hero get-hero" style="text-align:center;display:block">
+  <img class="app-icon" style="margin-left:auto;margin-right:auto" src="../../assets/localsafe/icon-512.png" alt="{LS_NAME} app icon" width="104" height="104">
+  <h1>{t["get_h"]}</h1>
+  <p class="tag">{t["tag"]}</p>
+  <div class="stores" style="justify-content:center">{ls_stores("en")}</div>
+  {ls_soon("en", t)}
+  <p style="margin-top:18px;font-size:14px"><a href="../">{t["more"]}</a></p>
+</section>
+"""
+    write("localsafe/get/index.html", page(t["get_h"], t["desc"], body, "localsafe/get/index.html",
+                                           head=script, product=LOCALSAFE))
+
+
+def localsafe_pages():
+    if not (ROOT / "src" / "localsafe-privacy.en.md").exists():
+        print("Нет src/localsafe-privacy.*.md — страницы Local Safe пропущены")
+        return
+    for lang in ("en", "ru"):
+        ls_landing(lang)
+        ls_support(lang)
+        ls_policy(lang)
+    ls_get_page()
+
+
 def build_pages():
+    studio_home()
     landing()
+    localsafe_pages()
     policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "SortIt — Privacy Policy")
     # Русская версия пока не публикуется: старый адрес ведёт на английскую
     write("sortit/privacy/ru/index.html", f"""<!doctype html><meta charset="utf-8"><title>SortIt — Privacy Policy</title>

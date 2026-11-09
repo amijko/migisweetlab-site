@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Safe — Privacy policy</title>
+<meta name="description" content="Local Safe privacy policy">
+<link rel="canonical" href="https://migisweetlab.com/localsafe/privacy/">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/localsafe/icon-32.png">
+<link rel="apple-touch-icon" href="../../assets/localsafe/icon-180.png">
+<meta property="og:title" content="Local Safe — Privacy policy">
+<meta property="og:description" content="Local Safe privacy policy">
+<meta property="og:image" content="https://migisweetlab.com/assets/localsafe/icon-512.png">
+<meta property="og:url" content="https://migisweetlab.com/localsafe/privacy/">
+<meta name="theme-color" content="#0E1A2B">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/style.css">
+</head>
+<body class="ls">
+<div class="wrap">
+<header class="top">
+  <a class="brand" href="../../localsafe/"><img src="../../assets/localsafe/icon-192.png" alt="">Local Safe</a>
+  <nav class="nav">
+    <a href="../../localsafe/support/">Help</a>
+    <a href="../../localsafe/privacy/">Privacy</a>
+    <a href="../../localsafe/ru/">RU</a>
+  </nav>
+</header>
+<article class="doc"><a class="lang" href="ru/">RU</a><h1>Local Safe — Privacy policy</h1>
+<p>Effective date: 9 November 2026</p>
+<p>Local Safe works without a network. Your data stays on your device.</p>
+<h2>Data collection</h2>
+<p>Local Safe does not collect, transmit or sell your data. The app has no network calls, no analytics and no third-party SDKs. On Android it does not declare the INTERNET permission.</p>
+<h2>Storage</h2>
+<p>Your vault is one KDBX 4 file on your device. It is encrypted with your master password. You choose the file with the system file picker (Storage Access Framework on Android, Files on iOS). If you keep the file in Google Drive or iCloud, those services sync it outside the app under their own rules. Before saving, the app re-reads the file and merges changes made outside the app.</p>
+<h2>Master password</h2>
+<p>The app never stores your master password. If you forget it, the app cannot recover your vault.</p>
+<h2>Biometrics</h2>
+<p>If you turn on biometrics, the app stores the vault key (derived from your password) in encrypted form. On Android the encryption key is in the Android Keystore. It works only after strong biometric authentication and stops working when a new fingerprint is added. On iOS the key is in the Keychain. Access requires the current set of enrolled biometrics, the key stays on this device only, and it is stored only while a device passcode is set. The app cannot access your fingerprints or your face: the system performs the check.</p>
+<h2>Permissions</h2>
+<p>On Android the app asks only for biometric authentication (USE_BIOMETRIC) and declares an autofill service. On iOS it uses only the Face ID usage description and a password AutoFill extension. The app has no access to your camera, contacts, location or network.</p>
+<h2>Photos</h2>
+<p>You pick photos with the system photo picker (Android Photo Picker, iOS PHPicker). The app receives only the photos you select and has no access to your whole gallery. Text recognition on photos runs on your device without network: PaddleOCR models on ONNX Runtime on Android, Apple Vision on iOS.</p>
+<h2>Autofill</h2>
+<p>Autofill fills your login and password only into the field you choose. It does not send them anywhere.</p>
+<h2>Backups</h2>
+<p>The Android manifest allows system backups. The app keeps its settings, its list of recent vaults and its encrypted biometric key in a folder that is excluded from backups. The vault file stays where you chose to put it. The Android Keystore key does not leave the device.</p>
+<h2>Deleting your data</h2>
+<p>To delete all your data, delete the vault file and uninstall the app. Uninstalling removes the app settings and the stored biometric key.</p>
+<h2>Contact</h2>
+<p>Questions about this policy: <a href="mailto:migisweetlab@gmail.com">migisweetlab@gmail.com</a></p></article>
+<footer>
+  <span>© 2026 <a href="../../">Migisweetlab</a> · <a href="../../">All apps</a></span>
+  <span><a href="../../localsafe/privacy/">Privacy Policy</a> · <a href="mailto:migisweetlab@gmail.com">migisweetlab@gmail.com</a></span>
+</footer>
+</div>
+</body>
+</html>
