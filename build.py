@@ -658,7 +658,7 @@ LS_LANDING = {
         h1='Your passwords deserve better than <span class="brass">a sticky note.</span>',
         lead=("Keep every login in one encrypted vault on your phone, unlock it with your face or fingerprint, "
               "and let it fill passwords in for you. No account, no internet access."),
-        meta="Free · iPhone and Android · English and Russian",
+        meta="Free · iPhone and Android",
         nb_kicker="From the notebook to the vault",
         nb_h="The notebook by the router has had a good run.",
         nb_paper="On paper or in Notes",
@@ -704,7 +704,7 @@ LS_LANDING = {
         h1='Паролям нужно место надёжнее, чем <span class="brass">бумажка.</span>',
         lead=("Храните все логины в одном зашифрованном сейфе на телефоне, открывайте его лицом или отпечатком — "
               "пароли подставятся сами. Без аккаунта и без доступа в интернет."),
-        meta="Бесплатно · iPhone и Android · русский и английский",
+        meta="Бесплатно · iPhone и Android",
         nb_kicker="От блокнота к сейфу",
         nb_h="Блокнот у роутера своё отслужил.",
         nb_paper="На бумаге или в Заметках",
