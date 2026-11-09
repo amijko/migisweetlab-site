@@ -246,7 +246,7 @@ body.ls a { color: #e3a73e; }
 .ls-tile b { font-size: 17px; }
 .ls-tile span { font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
 .ls-duo { display: flex; justify-content: center; gap: 18px; align-items: flex-start; }
-.ls-duo .ls-phone.low { margin-top: 64px; }
+.ls-duo .ls-phone { width: 280px; }
 .ls-never { margin: 0; padding: 0; list-style: none; }
 .ls-never li { display: flex; gap: 16px; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--line); font-size: 18px; font-weight: 700; }
 .ls-never li:last-child { border-bottom: 0; }
@@ -265,7 +265,7 @@ body.ls .ls-cta a { background: #0e1a2b; color: #fff; text-decoration: none; bor
   .ls-fan { height: 360px; }
   .ls-fan .ls-phone.main { width: 190px; }
   .ls-fan .ls-phone.side { width: 160px; }
-  .ls-duo .ls-phone { width: 46%; }
+  .ls-duo .ls-phone { width: 62%; }
   .ls-section { padding: 64px 0; }
   .ls-cta { padding: 32px 26px; }
 }

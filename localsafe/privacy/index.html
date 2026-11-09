@@ -32,7 +32,7 @@
 <p>Effective date: 9 November 2026</p>
 <p>Local Safe works without a network. Your data stays on your device.</p>
 <h2>Data collection</h2>
-<p>Local Safe does not collect, transmit or sell your data. The app has no network calls and no analytics. The only third-party SDK is the Google Play feature delivery library, which the app uses only to check which text recognition modules are installed. On Android it does not declare the INTERNET permission.</p>
+<p>Local Safe does not collect, transmit or sell your data. The app has no network calls and no analytics. The only third-party SDK is the Google Play feature delivery library, which the app uses only to request, check and remove the optional text recognition modules. On Android it does not declare the INTERNET permission.</p>
 <h2>Storage</h2>
 <p>Your vault is one KDBX 4 file on your device. It is encrypted with your master password. You choose the file with the system file picker (Storage Access Framework on Android, Files on iOS). If you keep the file in Google Drive or iCloud, those services sync it outside the app under their own rules. Before saving, the app re-reads the file and merges changes made outside the app.</p>
 <h2>Master password</h2>
@@ -42,7 +42,7 @@
 <h2>Permissions</h2>
 <p>On Android the app asks only for biometric authentication (USE_BIOMETRIC) and declares an autofill service. On iOS it uses only the Face ID usage description and a password AutoFill extension. The app has no access to your camera, contacts, location or network.</p>
 <h2>Photos</h2>
-<p>You pick photos with the system photo picker (Android Photo Picker, iOS PHPicker). The app receives only the photos you select and has no access to your whole gallery. Text recognition on photos runs on your device without network: on Android, Google Play downloads the PaddleOCR models and ONNX Runtime as optional app modules; the app itself does not connect to the network. On iOS it uses Apple Vision.</p>
+<p>You pick photos with the system photo picker (Android Photo Picker, iOS PHPicker). The app receives only the photos you select and has no access to your whole gallery. Text recognition on photos runs on your device, without a network. Your photos are never sent anywhere. On Android, Google Play downloads the recognition modules (ONNX Runtime and the PaddleOCR models) only when you turn on Fill from photo in Settings and choose the languages. The app itself does not connect to the network, and you can remove the modules in Settings at any time. On iOS the app uses Apple Vision.</p>
 <h2>Autofill</h2>
 <p>Autofill fills your login and password only into the field you choose. It does not send them anywhere.</p>
 <h2>Backups</h2>

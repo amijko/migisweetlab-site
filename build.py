@@ -54,7 +54,6 @@ LS_SHOTS = {  # эталон 720×1280 → 540×960 на сайте; {L} — Eng
     "shot-entry": "EntryScreenshotTest.entryPasswordShown{L}.png",
     "shot-docs": "EntryFormScreenshotTest.documentKindPicker{L}.png",
     "shot-unlock": "UnlockScreenshotTest.unlockWithBiometrics{L}.png",
-    "shot-templates": "CountryTemplatesScreenshotTest.countryTemplates{L}.png",
 }
 LS_SHOT_SIZE = (540, 960)
 LS_NAME = "Local Safe"
@@ -678,11 +677,11 @@ LS_LANDING = {
         docs_h="Documents, cards and photos — encrypted the same way.",
         docs_p=("Your passport number, driving licence, bank cards, a scan of the insurance letter. "
                 "Everything sits in the same vault, behind the same master password."),
-        docs_tiles=[("Documents", "Templates for every country, with the right fields"),
+        docs_tiles=[("Documents", "Passport, ID and licence templates with the right fields"),
                     ("Bank cards", "Number, expiry, CVV and PIN, hidden until you tap"),
                     ("Photos and scans", "Attach images and PDFs to any entry, encrypted inside the file"),
                     ("Secure notes", "Wi-Fi codes, door codes, anything else")],
-        docs_alt=["Choosing a document type", "Document templates of a country"],
+        docs_alt=["Choosing a document type"],
         never_kicker="What it never does",
         never_h="Trust you can check before you install.",
         never_p="Look at the permissions on Google Play or the privacy label on the App Store: there is nothing to see.",
@@ -724,11 +723,11 @@ LS_LANDING = {
         docs_h="Документы, карты и фото — зашифрованы так же.",
         docs_p=("Номер паспорта, права, банковские карты, скан страховки. "
                 "Всё лежит в том же сейфе, за тем же мастер-паролем."),
-        docs_tiles=[("Документы", "Шаблоны любой страны с нужными полями"),
+        docs_tiles=[("Документы", "Шаблоны паспорта, ID и прав с нужными полями"),
                     ("Банковские карты", "Номер, срок, CVV и PIN скрыты до касания"),
                     ("Фото и сканы", "Картинки и PDF в любой записи, внутри зашифрованного файла"),
                     ("Заметки", "Коды от Wi-Fi и домофона, всё остальное")],
-        docs_alt=["Выбор вида документа", "Шаблоны документов страны"],
+        docs_alt=["Выбор вида документа"],
         never_kicker="Чего оно никогда не делает",
         never_h="Доверие, которое можно проверить до установки.",
         never_p="Посмотрите разрешения в Google Play или ярлык конфиденциальности в App Store — там пусто.",
@@ -815,7 +814,6 @@ def ls_landing(lang):
   </div>
   <div class="ls-duo">
     <div class="ls-phone"><img src="{a}shot-docs.{lang}.webp" alt="{c["docs_alt"][0]}" width="540" height="960" loading="lazy"></div>
-    <div class="ls-phone low"><img src="{a}shot-templates.{lang}.webp" alt="{c["docs_alt"][1]}" width="540" height="960" loading="lazy"></div>
   </div>
 </section>
 </div>
