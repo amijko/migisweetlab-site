@@ -9,8 +9,9 @@
 Источник правды — репозиторий игры (SORTIT_REPO, по умолчанию ../SortIt):
 - политика конфиденциальности — копия той, что внутри игры
   (shared/src/commonMain/composeResources/files/legal/privacy_{en,ru}.md) → src/privacy-policy.*.md;
-- скриншоты на лендинге — эталоны скриншот-тестов игры (SHOTS ниже) → assets/shot-*.webp.
-Руками src/privacy-policy.*.md и assets/shot-*.webp не править: build.py перезапишет их из игры.
+- скриншоты на лендинге — эталоны скриншот-тестов игры (SHOTS ниже) → assets/shot-*.webp;
+- иконка — iOS-иконка игры 1024 (APP_ICON) → assets/icon-*.png.
+Руками src/privacy-policy.*.md, assets/shot-*.webp и assets/icon-*.png не править: build.py перезапишет их из игры.
 """
 from pathlib import Path
 import io
@@ -36,6 +37,8 @@ SHOTS = {
 }
 SHOT_SIZE = (585, 1266)
 APP_LEVELS = "shared/src/commonMain/composeResources/files/levels"
+APP_ICON = "iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/icon-1024.png"
+ICON_SIZES = (32, 180, 192, 512)
 
 # --- Local Safe (репозиторий LocalVault) ---
 # Источник правды — репозиторий приложения (LOCALVAULT_REPO, по умолчанию ../LocalVault):
@@ -155,6 +158,11 @@ def synced_files():
         buf = io.BytesIO()
         im.save(buf, "WEBP", quality=88, method=6)
         out[f"assets/{site_name}"] = buf.getvalue()
+    icon = Image.open(APP / APP_ICON).convert("RGB")
+    for size in ICON_SIZES:
+        buf = io.BytesIO()
+        icon.resize((size, size), Image.LANCZOS).save(buf, "PNG", optimize=True)
+        out[f"assets/icon-{size}.png"] = buf.getvalue()
     out.update(localsafe_files())
     return out
 
