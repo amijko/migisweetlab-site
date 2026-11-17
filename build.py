@@ -272,6 +272,12 @@ LOCALSAFE_RU = dict(LOCALSAFE, home="localsafe/ru/", nav=[("localsafe/ru/support
                                                           ("localsafe/privacy/ru/", "Политика"),
                                                           ("localsafe/", "EN")],
                     privacy="localsafe/privacy/ru/")
+# Lemo Dots: на сайте только политика (раздела на главной нет). Иконка — assets/lemodots/icon-*.png.
+LEMODOTS = dict(name="Lemo Dots", home="lemodots/privacy/", icon="assets/lemodots/icon", theme="#0f1d35", body="ls",
+                font=MANROPE, nav=[("lemodots/privacy/", "Privacy"), ("lemodots/privacy/ru/", "RU")],
+                privacy="lemodots/privacy/")
+LEMODOTS_RU = dict(LEMODOTS, nav=[("lemodots/privacy/ru/", "Политика"), ("lemodots/privacy/", "EN")],
+                   privacy="lemodots/privacy/ru/")
 STUDIO = dict(name="Migisweetlab", home="", icon="assets/icon", theme="#0B0D12", body="studio",
               font=MANROPE, nav=[("sortit/", "SortIt"), ("localsafe/", LS_NAME)], privacy="")
 
@@ -963,10 +969,25 @@ def localsafe_pages():
     ls_get_page()
 
 
+def lemodots_pages():
+    """/lemodots/privacy/ (+ ru/) — политика Lemo Dots из src/lemodots-privacy.*.md (их правят здесь, руками)."""
+    for lang in ("en", "ru"):
+        path = "lemodots/privacy/index.html" if lang == "en" else "lemodots/privacy/ru/index.html"
+        md = (ROOT / "src" / f"lemodots-privacy.{lang}.md").read_text(encoding="utf-8")
+        html = (markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"]) if markdown else md_to_html(md))
+        html = html.replace(EMAIL, f'<a href="mailto:{EMAIL}">{EMAIL}</a>')
+        other = ('<a class="lang" href="ru/">RU</a>' if lang == "en" else '<a class="lang" href="../">EN</a>')
+        title = md.splitlines()[0].lstrip("# ").strip()
+        desc = "Lemo Dots privacy policy" if lang == "en" else "Политика конфиденциальности Lemo Dots"
+        write(path, page(title, desc, f'<article class="doc">{other}{html}</article>', path, lang=lang,
+                         product=LEMODOTS if lang == "en" else LEMODOTS_RU))
+
+
 def build_pages():
     studio_home()
     landing()
     localsafe_pages()
+    lemodots_pages()
     policy("privacy-policy.en.md", "sortit/privacy/index.html", "en", "SortIt — Privacy Policy")
     # Русская версия пока не публикуется: старый адрес ведёт на английскую
     write("sortit/privacy/ru/index.html", f"""<!doctype html><meta charset="utf-8"><title>SortIt — Privacy Policy</title>
