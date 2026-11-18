@@ -272,3 +272,24 @@ body.ls .ls-cta a { background: #0e1a2b; color: #fff; text-decoration: none; bor
 .ls .get-hero h1 { color: #e3a73e; text-shadow: none; font-weight: 800; letter-spacing: -1.5px; font-size: clamp(36px, 6vw, 56px); }
 .ls .get-hero .tag { color: #fff; }
 .ls .get-hero .app-icon { box-shadow: 0 0 0 1px #23405f; }
+
+/* ---------- Lemo Dots: тема Local Safe, акцент — розовый темы Pinky dark ---------- */
+body.ld { --bg: #0f1d35; --bg-stripe: #0f1d35; --brand: #f24473; --brand-dark: #ff7a9c; --btn-green: #f24473; --btn-green-dark: #b82a52; }
+body.ld a { color: #ff7a9c; }
+.ld .ld-pink, .ld .kicker { color: #ff7a9c; }
+.ld .btn { background: #f24473; }
+.ld a.btn, .ld .btn { color: #fff !important; }
+.ld .btn.soon { background: #1c2f52; color: #c6cfdc !important; }
+.ld .ls-hero { background: radial-gradient(circle at center, rgba(255, 255, 255, .07) 1.6px, transparent 2px) 0 0 / 18px 18px; }
+.ld .ls-hero-icon { box-shadow: 0 0 0 1px #2a4170, 0 24px 60px rgba(242, 68, 115, .22); }
+.ld .ls-fan .ls-phone.main { border-color: #f24473; }
+.ld .ls-phone { border-color: #1c2f52; background: #1c2f52; }
+.ld .ls-band { background: #13223d; }
+.ld .ls-band.deep { background: #0c172b; }
+.ld .ls-tile { background: #182a4a; border-color: #263d66; }
+.ld-watch { display: flex; justify-content: center; }
+.ld-watch img { width: min(360px, 80%); height: auto; border-radius: 50%; border: 10px solid #1c2f52; box-shadow: 0 30px 70px rgba(0, 0, 0, .45); }
+@media (max-width: 820px) {
+  .ld .ls-duo { gap: 12px; }
+  .ld .ls-duo .ls-phone { width: calc(50% - 6px); }
+}

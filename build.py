@@ -164,6 +164,7 @@ def synced_files():
         icon.resize((size, size), Image.LANCZOS).save(buf, "PNG", optimize=True)
         out[f"assets/icon-{size}.png"] = buf.getvalue()
     out.update(localsafe_files())
+    out.update(lemodots_files())
     return out
 
 
@@ -190,6 +191,41 @@ def localsafe_policy_md(lang: str) -> str:
         lines += [f"## {s[f'privacy_{key}_title']}", "", body, ""]
     # Приложение переименовано в Local Safe (09.11.2026); пока строки в нём не обновлены — меняем здесь.
     return "\n".join(lines).replace("LocalVault", LS_NAME)
+
+
+# --- Lemo Dots (репозиторий LemoDot) ---
+# Картинки визитки берутся из store/ приложения (рендер шейдера обоев и циферблата, store/tools/):
+# LD_SHOTS → assets/lemodots/shot-*.webp, циферблат → wear.webp. Нет репозитория — остаются те, что в сайте.
+LD = Path(os.environ.get("LEMODOT_REPO") or ROOT.parent / "LemoDot").expanduser()
+LD_SHOTS = {"shot-nexus4": "store/phone/clean/01_nexus4.png", "shot-wine": "store/phone/clean/02_wine.png",
+            "shot-glamour": "store/phone/clean/04_glamour.png", "shot-night": "store/phone/clean/03_nightLights.png",
+            "shot-water": "store/phone/clean/05_water.png"}
+LD_WEAR = "store/wear/01_watchface.png"
+LD_ICON = "store/icon_512.png"
+# Google Play: пока приложение только во внутреннем тестировании — кнопка «Скоро». Вписать после публикации.
+LD_GOOGLE_PLAY_URL = ""  # https://play.google.com/store/apps/details?id=org.sweetlemonade.dots
+
+
+def lemodots_files():
+    """Картинки визитки Lemo Dots из репозитория LemoDot: путь → байты. Пусто, если репозитория нет."""
+    from PIL import Image
+    if not (LD / LD_ICON).is_file():
+        print(f"Нет репозитория LemoDot ({LD}): картинки Lemo Dots не обновляю (задай LEMODOT_REPO)")
+        return {}
+    out = {}
+    for name, src in LD_SHOTS.items():
+        buf = io.BytesIO()
+        Image.open(LD / src).convert("RGB").resize((540, 960), Image.LANCZOS).save(buf, "WEBP", quality=88, method=6)
+        out[f"assets/lemodots/{name}.webp"] = buf.getvalue()
+    buf = io.BytesIO()
+    Image.open(LD / LD_WEAR).convert("RGB").resize((600, 600), Image.LANCZOS).save(buf, "WEBP", quality=90, method=6)
+    out["assets/lemodots/wear.webp"] = buf.getvalue()
+    icon = Image.open(LD / LD_ICON).convert("RGB")
+    for size in (32, 180, 192, 512):
+        buf = io.BytesIO()
+        icon.resize((size, size), Image.LANCZOS).save(buf, "PNG", optimize=True)
+        out[f"assets/lemodots/icon-{size}.png"] = buf.getvalue()
+    return out
 
 
 def localsafe_files():
@@ -272,11 +308,11 @@ LOCALSAFE_RU = dict(LOCALSAFE, home="localsafe/ru/", nav=[("localsafe/ru/support
                                                           ("localsafe/privacy/ru/", "Политика"),
                                                           ("localsafe/", "EN")],
                     privacy="localsafe/privacy/ru/")
-# Lemo Dots: на сайте только политика (раздела на главной нет). Иконка — assets/lemodots/icon-*.png.
-LEMODOTS = dict(name="Lemo Dots", home="lemodots/privacy/", icon="assets/lemodots/icon", theme="#0f1d35", body="ls",
-                font=MANROPE, nav=[("lemodots/privacy/", "Privacy"), ("lemodots/privacy/ru/", "RU")],
+# Lemo Dots: визитка /lemodots/ (+ ru/) и политика; раздела на главной нет. Тёмная тема Local Safe с розовым акцентом.
+LEMODOTS = dict(name="Lemo Dots", home="lemodots/", icon="assets/lemodots/icon", theme="#0f1d35", body="ls ld",
+                font=MANROPE, nav=[("lemodots/privacy/", "Privacy"), ("lemodots/ru/", "RU")],
                 privacy="lemodots/privacy/")
-LEMODOTS_RU = dict(LEMODOTS, nav=[("lemodots/privacy/ru/", "Политика"), ("lemodots/privacy/", "EN")],
+LEMODOTS_RU = dict(LEMODOTS, home="lemodots/ru/", nav=[("lemodots/privacy/ru/", "Политика"), ("lemodots/", "EN")],
                    privacy="lemodots/privacy/ru/")
 STUDIO = dict(name="Migisweetlab", home="", icon="assets/icon", theme="#0B0D12", body="studio",
               font=MANROPE, nav=[("sortit/", "SortIt"), ("localsafe/", LS_NAME)], privacy="")
@@ -969,9 +1005,131 @@ def localsafe_pages():
     ls_get_page()
 
 
+LD_TEXT = {
+    "en": dict(
+        title="Lemo Dots — live wallpaper of glowing dots",
+        desc="Live wallpaper with the shimmering dot pattern of the Nexus 4 back, and a matching Wear OS watch face. Free, no ads.",
+        h1='The Nexus 4 glass, <span class="ld-pink">alive on your screen.</span>',
+        lead="A grid of dots that glow as light slowly drifts across them. Tilt the phone and the light follows; "
+             "swipe between home screens and the grid moves with you.",
+        soon="In testing now — public release soon.", get_small="Get it on", soon_small="Soon on",
+        meta="Android 5.0+ · Wear OS 5+ · free, no ads",
+        hero_alt=["Wine theme", "Nexus 4 theme", "Glamour theme"],
+        make_kicker="Make it yours", make_h="Fifteen themes to start. Every dot to tune.",
+        make_p="Start from the classic Nexus 4 glass or any of the built-in themes, then change everything: "
+               "colors, shape, size, light and motion — with a full-screen live preview while you tweak.",
+        tiles=[("Colors", "One color or a four-corner gradient, any background, optional grid lines."),
+               ("Shape", "Circles or squares, any dot size, how many dots are lit and how softly they glow."),
+               ("Motion", "Light drift, tilt lighting and tilt parallax, each with its own speed."),
+               ("Themes", "Save your own themes and switch between them in one tap.")],
+        make_alt=["Night lights theme", "Water theme"],
+        wear_kicker="Wear OS", wear_h="The same dots on your wrist.",
+        wear_p="A watch face with the Nexus 4 dots slowly shimmering behind the time, plus weather, date, "
+               "battery, steps and heart rate. In always-on mode it switches to a dim, battery-friendly version.",
+        wear_alt="Lemo Dots watch face",
+        quiet_kicker="Quiet by design", quiet_h="No ads. No tracking. Not even internet access.",
+        quiet_p='The phone app has no internet permission, no accounts and no analytics; rendering runs on the GPU '
+                'and pauses as soon as the wallpaper is hidden. <a href="{privacy}">Privacy policy</a>.',
+    ),
+    "ru": dict(
+        title="Lemo Dots — живые обои из светящихся точек",
+        desc="Живые обои с мерцающими точками в стиле задней панели Nexus 4 и такой же циферблат для Wear OS. Бесплатно, без рекламы.",
+        h1='Узор Nexus 4 — <span class="ld-pink">живой, на вашем экране.</span>',
+        lead="Сетка точек, которые вспыхивают там, где медленно проходит свет. Наклоните телефон — свет повернётся "
+             "вслед; листайте рабочие столы — сетка сдвинется за ними.",
+        soon="Сейчас идёт тестирование, публичный выпуск — скоро.", get_small="Доступно в", soon_small="Скоро в",
+        meta="Android 5.0+ · Wear OS 5+ · бесплатно, без рекламы",
+        hero_alt=["Тема «Вино»", "Тема Nexus 4", "Тема Glamour"],
+        make_kicker="Под себя", make_h="Пятнадцать тем для старта. Каждую точку — настроить.",
+        make_p="Начните с классического стекла Nexus 4 или любой готовой темы и меняйте всё: цвета, форму, размер, "
+               "свет и движение — с полноэкранным живым предпросмотром.",
+        tiles=[("Цвета", "Один цвет или градиент по четырём углам, любой фон, линии сетки."),
+               ("Форма", "Круги или квадраты, любой размер, сколько точек светится и насколько мягко."),
+               ("Движение", "Блуждающий свет, свет и параллакс от наклона — у каждого своя скорость."),
+               ("Темы", "Сохраняйте свои темы и переключайтесь одним касанием.")],
+        make_alt=["Тема «Ночные огни»", "Тема «Вода»"],
+        wear_kicker="Wear OS", wear_h="Те же точки — на запястье.",
+        wear_p="Циферблат, где точки Nexus 4 медленно мерцают за временем, а рядом погода, дата, заряд, шаги и пульс. "
+               "В режиме «Всегда включён» — приглушённая версия, бережная к батарее.",
+        wear_alt="Циферблат Lemo Dots",
+        quiet_kicker="Тихо и честно", quiet_h="Без рекламы. Без слежки. Даже без интернета.",
+        quiet_p='У приложения для телефона нет разрешения на интернет, аккаунтов и аналитики; отрисовка идёт на '
+                'видеокарте и останавливается, как только обои скрыты. <a href="{privacy}">Политика конфиденциальности</a>.',
+    ),
+}
+
+
+def ld_landing(lang):
+    """/lemodots/ и /lemodots/ru/ — визитка Lemo Dots: тёмная тема Local Safe, розовый акцент Pinky dark."""
+    t = LD_TEXT[lang]
+    path = "lemodots/index.html" if lang == "en" else "lemodots/ru/index.html"
+    up = "../" * path.count("/")
+    a = f"{up}assets/lemodots/"
+    privacy = "privacy/" if lang == "en" else "../privacy/ru/"
+    if LD_GOOGLE_PLAY_URL:
+        play, note = store_btn(LD_GOOGLE_PLAY_URL, PLAY_SVG, t["get_small"], "Google Play"), ""
+    else:
+        play, note = store_btn("", PLAY_SVG, t["soon_small"], "Google Play"), f'<p class="soon-note">{t["soon"]}</p>'
+    fan = "\n".join(f'<div class="ls-phone {cls}"><img src="{a}shot-{n}.webp" alt="{alt}" width="540" height="960"></div>'
+                    for (n, cls), alt in zip([("wine", "side l"), ("nexus4", "main"), ("glamour", "side r")], t["hero_alt"]))
+    tiles = "\n".join(f'<div class="ls-tile"><b>{h}</b><span>{p}</span></div>' for h, p in t["tiles"])
+    body = f"""
+<section class="ls-hero">
+  <img class="ls-hero-icon" src="{a}icon-512.png" alt="Lemo Dots app icon" width="112" height="112">
+  <h1>{t["h1"]}</h1>
+  <p class="lead">{t["lead"]}</p>
+  <div class="stores">{play}</div>
+  {note}
+  <p class="meta">{t["meta"]}</p>
+  <div class="ls-fan">
+{fan}
+  </div>
+</section>
+</div>
+
+<div class="ls-band">
+<div class="wrap">
+<section class="ls-section ls-split">
+  <div>
+    <p class="kicker">{t["make_kicker"]}</p>
+    <h2>{t["make_h"]}</h2>
+    <p class="ls-p">{t["make_p"]}</p>
+    <div class="ls-tiles">
+{tiles}
+    </div>
+  </div>
+  <div class="ls-duo">
+    <div class="ls-phone"><img src="{a}shot-night.webp" alt="{t["make_alt"][0]}" width="540" height="960" loading="lazy"></div>
+    <div class="ls-phone"><img src="{a}shot-water.webp" alt="{t["make_alt"][1]}" width="540" height="960" loading="lazy"></div>
+  </div>
+</section>
+
+<section class="ls-section ls-split">
+  <div class="ld-watch"><img src="{a}wear.webp" alt="{t["wear_alt"]}" width="600" height="600" loading="lazy"></div>
+  <div>
+    <p class="kicker">{t["wear_kicker"]}</p>
+    <h2>{t["wear_h"]}</h2>
+    <p class="ls-p">{t["wear_p"]}</p>
+  </div>
+</section>
+</div>
+</div>
+
+<div class="ls-band deep">
+<div class="wrap">
+<section class="ls-section">
+  <p class="kicker">{t["quiet_kicker"]}</p>
+  <h2>{t["quiet_h"]}</h2>
+  <p class="ls-p">{t["quiet_p"].format(privacy=privacy)}</p>
+</section>
+"""
+    write(path, page(t["title"], t["desc"], body, path, lang=lang, product=LEMODOTS if lang == "en" else LEMODOTS_RU))
+
+
 def lemodots_pages():
-    """/lemodots/privacy/ (+ ru/) — политика Lemo Dots из src/lemodots-privacy.*.md (их правят здесь, руками)."""
+    """/lemodots/ (+ ru/) — визитка; /lemodots/privacy/ (+ ru/) — политика из src/lemodots-privacy.*.md (правят здесь)."""
     for lang in ("en", "ru"):
+        ld_landing(lang)
         path = "lemodots/privacy/index.html" if lang == "en" else "lemodots/privacy/ru/index.html"
         md = (ROOT / "src" / f"lemodots-privacy.{lang}.md").read_text(encoding="utf-8")
         html = (markdown.markdown(md, extensions=["extra", "sane_lists", "nl2br"]) if markdown else md_to_html(md))
