@@ -17,7 +17,9 @@ To let you continue playing, the game saves on your device:
 - which in-app purchases you own (for example, unlocked level packs), so the game works offline;
 - settings (sound, music, vibration, analytics).
 
-This data stays on your device. It is removed when you delete the game or clear its data. Your phone's own backup (iCloud or Google backup) may include it, depending on your device settings; such backups are handled by Apple or Google under their privacy policies.
+This data stays on your device. It is removed when you delete the game or clear its data.
+
+**Cloud copy.** If backup is turned on in your device settings, Apple or Google may keep a copy of this data in your cloud account, so your progress can come back on a new device or after you reinstall the game: on iOS through iCloud Backup, on Android through Android Auto Backup to your Google account. On Android the copy contains only your game progress, purchases and settings; the technical app log is never included. The copy is made and stored by Apple or Google under their own privacy policies; we have no access to it. You can turn backup off in your device settings.
 
 ## Data we collect
 

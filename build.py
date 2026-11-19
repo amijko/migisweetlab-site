@@ -198,8 +198,8 @@ def localsafe_policy_md(lang: str) -> str:
 # LD_SHOTS → assets/lemodots/shot-*.webp, циферблат → wear.webp. Нет репозитория — остаются те, что в сайте.
 LD = Path(os.environ.get("LEMODOT_REPO") or ROOT.parent / "LemoDot").expanduser()
 LD_SHOTS = {"shot-nexus4": "store/phone/clean/01_nexus4.png", "shot-wine": "store/phone/clean/02_wine.png",
-            "shot-glamour": "store/phone/clean/04_glamour.png", "shot-night": "store/phone/clean/03_nightLights.png",
-            "shot-water": "store/phone/clean/05_water.png"}
+            "shot-sunset": "store/phone/clean/04_sunset.png", "shot-night": "store/phone/clean/03_nightLights.png",
+            "shot-aurora": "store/phone/clean/05_aurora.png"}
 LD_WEAR = "store/wear/01_watchface.png"
 LD_ICON = "store/icon_512.png"
 # Google Play: пока приложение только во внутреннем тестировании — кнопка «Скоро». Вписать после публикации.
@@ -1014,7 +1014,7 @@ LD_TEXT = {
              "swipe between home screens and the grid moves with you.",
         soon="In testing now — public release soon.", get_small="Get it on", soon_small="Soon on",
         meta="Android 5.0+ · Wear OS 5+ · free, no ads",
-        hero_alt=["Wine theme", "Nexus 4 theme", "Glamour theme"],
+        hero_alt=["Wine theme", "Nexus 4 theme", "Sunset Strip theme"],
         make_kicker="Make it yours", make_h="Fifteen themes to start. Every dot to tune.",
         make_p="Start from the classic Nexus 4 glass or any of the built-in themes, then change everything: "
                "colors, shape, size, light and motion — with a full-screen live preview while you tweak.",
@@ -1022,7 +1022,7 @@ LD_TEXT = {
                ("Shape", "Circles or squares, any dot size, how many dots are lit and how softly they glow."),
                ("Motion", "Light drift, tilt lighting and tilt parallax, each with its own speed."),
                ("Themes", "Save your own themes and switch between them in one tap.")],
-        make_alt=["Night lights theme", "Water theme"],
+        make_alt=["Night lights theme", "Aurora theme"],
         wear_kicker="Wear OS", wear_h="The same dots on your wrist.",
         wear_p="A watch face with the Nexus 4 dots slowly shimmering behind the time, plus weather, date, "
                "battery, steps and heart rate. In always-on mode it switches to a dim, battery-friendly version.",
@@ -1039,7 +1039,7 @@ LD_TEXT = {
              "вслед; листайте рабочие столы — сетка сдвинется за ними.",
         soon="Сейчас идёт тестирование, публичный выпуск — скоро.", get_small="Доступно в", soon_small="Скоро в",
         meta="Android 5.0+ · Wear OS 5+ · бесплатно, без рекламы",
-        hero_alt=["Тема «Вино»", "Тема Nexus 4", "Тема Glamour"],
+        hero_alt=["Тема «Вино»", "Тема Nexus 4", "Тема Sunset Strip"],
         make_kicker="Под себя", make_h="Пятнадцать тем для старта. Каждую точку — настроить.",
         make_p="Начните с классического стекла Nexus 4 или любой готовой темы и меняйте всё: цвета, форму, размер, "
                "свет и движение — с полноэкранным живым предпросмотром.",
@@ -1047,7 +1047,7 @@ LD_TEXT = {
                ("Форма", "Круги или квадраты, любой размер, сколько точек светится и насколько мягко."),
                ("Движение", "Блуждающий свет, свет и параллакс от наклона — у каждого своя скорость."),
                ("Темы", "Сохраняйте свои темы и переключайтесь одним касанием.")],
-        make_alt=["Тема «Ночные огни»", "Тема «Вода»"],
+        make_alt=["Тема «Ночные огни»", "Тема Aurora"],
         wear_kicker="Wear OS", wear_h="Те же точки — на запястье.",
         wear_p="Циферблат, где точки Nexus 4 медленно мерцают за временем, а рядом погода, дата, заряд, шаги и пульс. "
                "В режиме «Всегда включён» — приглушённая версия, бережная к батарее.",
@@ -1071,7 +1071,7 @@ def ld_landing(lang):
     else:
         play, note = store_btn("", PLAY_SVG, t["soon_small"], "Google Play"), f'<p class="soon-note">{t["soon"]}</p>'
     fan = "\n".join(f'<div class="ls-phone {cls}"><img src="{a}shot-{n}.webp" alt="{alt}" width="540" height="960"></div>'
-                    for (n, cls), alt in zip([("wine", "side l"), ("nexus4", "main"), ("glamour", "side r")], t["hero_alt"]))
+                    for (n, cls), alt in zip([("wine", "side l"), ("nexus4", "main"), ("sunset", "side r")], t["hero_alt"]))
     tiles = "\n".join(f'<div class="ls-tile"><b>{h}</b><span>{p}</span></div>' for h, p in t["tiles"])
     body = f"""
 <section class="ls-hero">
@@ -1100,7 +1100,7 @@ def ld_landing(lang):
   </div>
   <div class="ls-duo">
     <div class="ls-phone"><img src="{a}shot-night.webp" alt="{t["make_alt"][0]}" width="540" height="960" loading="lazy"></div>
-    <div class="ls-phone"><img src="{a}shot-water.webp" alt="{t["make_alt"][1]}" width="540" height="960" loading="lazy"></div>
+    <div class="ls-phone"><img src="{a}shot-aurora.webp" alt="{t["make_alt"][1]}" width="540" height="960" loading="lazy"></div>
   </div>
 </section>
 
